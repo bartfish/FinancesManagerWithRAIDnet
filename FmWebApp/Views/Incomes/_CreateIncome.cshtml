@@ -1,0 +1,52 @@
+﻿@model FMBusiness.ViewModels.IncomeVModels.CreateIncomeVModel
+
+<div class="incomes-container">
+    @using (Ajax.BeginForm("_CreateIncome", "Incomes",
+        new AjaxOptions()
+        {
+            HttpMethod = "Post",
+            UpdateTargetId = "adder-content",
+            InsertionMode = InsertionMode.Replace,
+            OnBegin = "ContainerManager.ShowLoadingAnimation",
+            OnComplete = "ContainerManager.HideLoadingAnimation"
+        }))
+    {
+        @Html.AntiForgeryToken()
+
+        <header>
+            <h4>
+                @Resources.TextForAddingIncome
+            </h4>
+        </header>
+
+        <div class="form-horizontal">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label" })
+                @Html.EditorFor(model => model.Name)
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Amount, htmlAttributes: new { @class = "control-label" })
+                @Html.EditorFor(model => model.Amount, new { htmlAttributes = new { @class = "only-numbers-allowed" } })
+                @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-danger" })
+
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.IncomeType, htmlAttributes: new { @class = "control-label" })
+                @Html.EnumDropDownListFor(model => model.IncomeType)
+                @Html.ValidationMessageFor(model => model.IncomeType, "", new { @class = "text-danger" })
+
+            </div>
+
+            <div class="form-group center-fullwidth">
+                <input type="submit" value="@Resources.TextForAdding" class="btn btn-default" />
+            </div>
+    </div>
+    }
+</div>
+
+<script>
+    ContainerManager.OnlyNumbersAllowed();
+</script>

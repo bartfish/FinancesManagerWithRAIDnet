@@ -1,0 +1,245 @@
+﻿@model FMBusiness.ViewModels.DashboardVModels.LayoutBaseVModel
+@using FMBusiness.HtmlHelpers
+@using FMBusiness.AjaxExtensions
+@using Resources
+
+<a class="go-mobile-nav" href="#"><span class="fa fa-bars"></span></a>
+
+<p class="lang">
+
+</p>
+
+<main>
+
+    <div class="">
+
+        <div id="top-container" class="col-md-12">
+
+            <div class="title-container col-md-3">
+                <h5>@Resources.TitleForDashboardTitle</h5>
+            </div>
+            <div class="options-container">
+                <nav>
+
+                    @Ajax.ActionLinkInnerHtml(
+                    "<span class=\"fa fa-plus\"></span>",
+                    "_Adder",
+                    "Dashboard", null,
+                    new AjaxOptions
+                    {
+                        UpdateTargetId = "adder-content",
+                        InsertionMode = InsertionMode.Replace,
+                        HttpMethod = "GET",
+                        OnComplete= "ContainerManager.ShowBgAndDialogContainers"
+                    }, new Dictionary<string, object> { { "class", "go-premium active-btn" } })
+
+                    @Ajax.ActionLinkInnerHtml(
+                    "<span class=\"fa fa-cogs\"></span>",
+                    "_Settings",
+                    "Dashboard", null,
+                    new AjaxOptions
+                    {
+                        UpdateTargetId = "adder-content",
+                        InsertionMode = InsertionMode.Replace,
+                        HttpMethod = "GET",
+                        OnComplete= "ContainerManager.ShowBgAndDialogContainers"
+                    }, new Dictionary<string, object> { { "class", "go-premium active-btn" } })
+
+                    @Html.ActionLinkInnerHtml(
+                    linkText: ""
+                        , actionName: "Logout"
+                        , controllerName: "Account"
+                        , rightInnerHtml: "<span class=\"fa fa-sign-out\" />"
+                        )
+
+                </nav>
+            </div>
+
+        </div>
+
+        <div class="">
+            <div id="nav-container" class="col-md-1">
+                <nav>
+                    @Ajax.ActionLinkInnerHtml(
+                     "<span class=\"text\">" + Resources.TextForNavDashboard + "</span><span class=\"fa fa-money\"></span>",
+                     "_DashboardContent", "Dashboard", null,
+                     new AjaxOptions
+                     {
+                         UpdateTargetId = "view-content",
+                         HttpMethod = WebRequestMethods.Http.Get,
+                         AllowCache = false,
+                         InsertionMode = InsertionMode.Replace,
+
+                         OnBegin = "ContainerManager.ShowContentLoadingAnimation",
+                         OnComplete = "ContainerManager.HideContentLoadingAnimation"
+
+                     }, new Dictionary<string, object> { { "class", "js-action-link" } })
+
+                    @Ajax.ActionLinkInnerHtml(
+                     "<span class=\"text\">" + Resources.TextForDashboardIncomes + "</span><span class=\"fa fa-angle-double-up\"></span>",
+                     "_GetIncomes", "Incomes",
+                     new
+                     {
+                         page = 1,
+                         pageSize = 8,
+                         sOrderByColumn = "",
+                         searchString = "",
+                         isBeingExported = false
+                     },
+                    new AjaxOptions
+                    {
+                        UpdateTargetId = "view-content",
+                        HttpMethod = WebRequestMethods.Http.Get,
+                        AllowCache = false,
+                        InsertionMode = InsertionMode.Replace,
+
+                        OnBegin = "ContainerManager.ShowContentLoadingAnimation",
+                        OnComplete = "ContainerManager.HideContentLoadingAnimation"
+
+                    }, new Dictionary<string, object> { { "class", "js-action-link" } })
+
+                    @Ajax.ActionLinkInnerHtml(
+                    "<span class=\"text\">" + Resources.TextForDashboardOutcomes + "</span><span class=\"fa fa-angle-double-down\"></span>",
+                    "_GetOutcomes", "Outcomes",
+                     new
+                     {
+                         page = 1,
+                         pageSize = 8,
+                         sOrderByColumn = "",
+                         searchString = "",
+                         isBeingExported = false
+                     },
+                    new AjaxOptions
+                    {
+                        UpdateTargetId = "view-content",
+                        HttpMethod = WebRequestMethods.Http.Get,
+                        AllowCache = false,
+                        InsertionMode = InsertionMode.Replace,
+
+                        OnBegin = "ContainerManager.ShowContentLoadingAnimation",
+                        OnComplete = "ContainerManager.HideContentLoadingAnimation"
+
+                    }, new Dictionary<string, object> { { "class", "js-action-link" } })
+
+                    @Ajax.ActionLinkInnerHtml(
+                    "<span class=\"text\">" + Resources.TextForDashboardGraphs + "</span><span class=\"fa fa-area-chart\"></span>",
+                    "_GenerateGraphsContent", "Graphs",
+                     new
+                     {
+                         page = 1,
+                         pageSize = 8,
+                         sOrderByColumn = "",
+                         searchString = "",
+                         isBeingExported = false
+                     },
+                    new AjaxOptions
+                    {
+                        UpdateTargetId = "view-content",
+                        HttpMethod = WebRequestMethods.Http.Get,
+                        AllowCache = false,
+                        InsertionMode = InsertionMode.Replace,
+
+                        OnBegin = "ContainerManager.ShowContentLoadingAnimation",
+                        OnComplete = "ContainerManager.HideContentLoadingAnimation"
+
+                    }, new Dictionary<string, object> { { "class", "js-action-link" } })
+
+                    @Ajax.ActionLinkInnerHtml(
+                    "Premium",
+                    "#", "", null,
+                    new AjaxOptions
+                    {
+                        UpdateTargetId = "div",
+                        InsertionMode = InsertionMode.Replace,
+                        HttpMethod = WebRequestMethods.Http.Get,
+                        LoadingElementId = "progress"
+                    },
+                    new Dictionary<string, object> { { "class", "go-premium active-btn" } })
+
+
+                    <a class="close-mobile-nav" href="#"><span class="text">@Resources.ActionCloseMobileNavButton</span><span class="fa fa-times"></span></a>
+                </nav>
+
+            </div>
+
+            <div id="content" class="col-md-11">
+
+                <div id="loader-bg-content-container"></div>
+                <div id="loader-content-container">
+
+                    <div class="lds-ellipsis">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+
+                </div>
+                <div id="view-content">
+                    @Html.Action("_DashboardContent");
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<div class="dialog-bg-container"></div>
+<div class="dialog-container">
+    <div id="adder-content"></div>
+
+    <a href="" class="close-dialog-container" onclick="ContainerManager.HideBgAndDialogContainers(); return false;">
+        <span class="fa fa-close"></span>
+    </a>
+</div>
+
+<div class="action-info-container">
+    <p></p>
+    <a href="#" onclick="ContainerManager.HideActionInfoAndRefreshDash(); return false;" class="close-action-info-container">
+        Thanks
+    </a>
+</div>
+
+<div id="loader-bg-container"></div>
+<div id="loader-container">
+
+    <div class="lds-ellipsis">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+
+</div>
+
+<script>
+
+    $(function () {
+
+        ContainerManager.GenerateMainHeight();
+        ContainerManager.GenerateMainContentHeight();
+        ContainerManager.GenerateNavContainerHeight();
+
+        ContainerManager.ShowMainContentContainer();
+
+        ContainerManager.TurnOnActiveNavigationButtons();
+        ContainerManager.onEnterClicked();
+        ContainerManager.ShowMobileNav();
+        ContainerManager.HideMobileNav();
+        ContainerManager.HideMobileNavAfterClick();
+        ContainerManager.GenerateMobileNavHeight();
+
+    }());
+
+
+    $(window).on("resize", function () {
+
+        ContainerManager.GenerateMainHeight();
+        ContainerManager.GenerateMainContentHeight();
+        ContainerManager.GenerateNavContainerHeight();
+        ContainerManager.GenerateMobileNavHeight();
+
+    });
+
+</script>

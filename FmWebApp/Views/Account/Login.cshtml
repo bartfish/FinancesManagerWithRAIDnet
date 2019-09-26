@@ -1,0 +1,65 @@
+﻿@model FMBusiness.ViewModels.AccountVModels.LoginVModel
+@using Resources;
+
+<div class="form-container">
+
+    @using (
+        Html.BeginForm(
+                "Login",
+                "Account",
+                FormMethod.Post,
+                new { @id = "login-form", @class = "container" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-horizontal">
+            <header>
+                <h4>@Resources.TitleForTheApp</h4>
+            </header>
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="form-group">
+                <div>
+                    @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @type = "email", @class = "form-control", @placeholder = Resources.LabelForEmail } })
+                    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div>
+                    @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @type = "password", @class = "form-control", @placeholder = Resources.LabelForPassword} })
+                    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <div>
+                    @Html.EditorFor(model => model.RememberMe, new { htmlAttributes = new { @class = "custom-checkbox" } })
+                    @Html.LabelFor(model => model.RememberMe, htmlAttributes: new { @class = "control-label" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div>
+                    <input type="submit" value="@Resources.ActionLoginButton" class="btn btn-default" />
+                </div>
+            </div>
+
+        </div>
+
+
+    }
+
+    <footer>
+        <p>@Resources.TextForNotHavingAccountYet</p>
+        @Html.ActionLink(Resources.ActionRegisterButton, "Register", null, null)
+    </footer>
+
+    <p class="lang">
+        @Html.ActionLink("PL", "SetCulture", new { culture = "pl" })
+        @Html.ActionLink("EN", "SetCulture", new { culture = "en" })
+    </p> 
+
+</div>
+

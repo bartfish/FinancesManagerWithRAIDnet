@@ -1,0 +1,30 @@
+﻿@{
+    Layout = null;
+}
+
+    <header>
+        <h4>
+            @Resources.TextForSettings
+        </h4>
+    </header>
+
+    <div class="col-md-12 settings choice-container">
+        
+        <div>
+            <h5>@Resources.TextForChangingCurrency</h5>
+
+            @Html.ActionLink("PLN", "SwitchCurrencyForDashboard", new { currency = FMDataModel.Enums.CurrencyType.PLN })
+            @Html.ActionLink("USD", "SwitchCurrencyForDashboard", new { currency = FMDataModel.Enums.CurrencyType.DOLLAR })
+            @Html.ActionLink("EUR", "SwitchCurrencyForDashboard", new { currency = FMDataModel.Enums.CurrencyType.EURO })
+
+        </div>
+
+        <div>
+            <h5>@Resources.TextForChangingLanguage</h5>
+
+            @Ajax.ActionLink("PL", "SetCulture", new { culture = "pl", returnUrl = "Dashboard" }, new AjaxOptions() { OnComplete = "location.reload();" }, null)
+            @Ajax.ActionLink("EN", "SetCulture", new { culture = "en", returnUrl = "Dashboard" }, new AjaxOptions() { OnComplete = "location.reload();" }, null)
+        </div>
+
+
+    </div>

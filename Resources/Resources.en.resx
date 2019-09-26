@@ -1,0 +1,300 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActionLoginButton" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="DashboardENButton" xml:space="preserve">
+    <value>EN</value>
+  </data>
+  <data name="DashboardPLButton" xml:space="preserve">
+    <value>PL</value>
+  </data>
+  <data name="TitleForDashboardSummary" xml:space="preserve">
+    <value>Summary</value>
+  </data>
+  <data name="ActionRegisterButton" xml:space="preserve">
+    <value>Sign up</value>
+  </data>
+  <data name="LabelForEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="LabelForPassword" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="LabelForRememberMe" xml:space="preserve">
+    <value>Do not forget me !</value>
+  </data>
+  <data name="TitleForDashboardTitle" xml:space="preserve">
+    <value>Workspace</value>
+  </data>
+  <data name="TitleForDashboardGraphs" xml:space="preserve">
+    <value>Graphs</value>
+  </data>
+  <data name="TextForNavDashboard" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="TextForDashboardIncomes" xml:space="preserve">
+    <value>Incomes</value>
+  </data>
+  <data name="TextForDashboardOutcomes" xml:space="preserve">
+    <value>Outcomes</value>
+  </data>
+  <data name="TextForDashboardGraphs" xml:space="preserve">
+    <value>Graphs</value>
+  </data>
+  <data name="TextForAddingIncome" xml:space="preserve">
+    <value>Add income</value>
+  </data>
+  <data name="TextForAddingOutcome" xml:space="preserve">
+    <value>Add outcome</value>
+  </data>
+  <data name="ActionCloseMobileNavButton" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="TextForIncomesType" xml:space="preserve">
+    <value>Income type</value>
+  </data>
+  <data name="TextForOutcomesType" xml:space="preserve">
+    <value>Outcome type</value>
+  </data>
+  <data name="TextForIncomeName" xml:space="preserve">
+    <value>Income name</value>
+  </data>
+  <data name="TextForIncomeAmount" xml:space="preserve">
+    <value>Amount</value>
+  </data>
+  <data name="TextForIncomeInsertTime" xml:space="preserve">
+    <value>Insert time</value>
+  </data>
+  <data name="TextForOutcomeName" xml:space="preserve">
+    <value>Outcome name</value>
+  </data>
+  <data name="TextForOutcomeAmount" xml:space="preserve">
+    <value>Outcome amount</value>
+  </data>
+  <data name="TextForOutcomeInsertTime" xml:space="preserve">
+    <value>Insert time</value>
+  </data>
+  <data name="MessageForInvalidLogin" xml:space="preserve">
+    <value>Invalid email or password</value>
+  </data>
+  <data name="MessageForErrorRegister" xml:space="preserve">
+    <value>Something went wrong, refresh the page and try again!</value>
+  </data>
+  <data name="MessageForSuccessIncomeSaving" xml:space="preserve">
+    <value>Income successfully saved into the database.</value>
+  </data>
+  <data name="MessageForErrorIncomeSaving" xml:space="preserve">
+    <value>There was an issue adding your new income... Sorry :(</value>
+  </data>
+  <data name="MessageForSuccessOutcomeSaving" xml:space="preserve">
+    <value>Outcome successfully saved into the database.</value>
+  </data>
+  <data name="MessageForErrorOutcomeSaving" xml:space="preserve">
+    <value>There was an issue adding your new outcome... Sorry :(</value>
+  </data>
+  <data name="TextForAdding" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="TextForIncome" xml:space="preserve">
+    <value>Income</value>
+  </data>
+  <data name="TextForOutcome" xml:space="preserve">
+    <value>Outcome</value>
+  </data>
+  <data name="TextForSaved" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="TextForCurrent" xml:space="preserve">
+    <value>Current</value>
+  </data>
+  <data name="TextForSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="TextForChangingCurrency" xml:space="preserve">
+    <value>Change currency</value>
+  </data>
+  <data name="ActionExportToCSV" xml:space="preserve">
+    <value>Export to CSV</value>
+  </data>
+  <data name="TextForNotHavingAccountYet" xml:space="preserve">
+    <value>Don't have an account yet?</value>
+  </data>
+  <data name="TitleForTheApp" xml:space="preserve">
+    <value>Finances Manager</value>
+  </data>
+  <data name="LabelForRepeatPassword" xml:space="preserve">
+    <value>Repeat password</value>
+  </data>
+  <data name="LabelForName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="LabelForTermsAndConditions" xml:space="preserve">
+    <value>I accept Terms and Conditions</value>
+  </data>
+  <data name="TextForHavingAccountAlready" xml:space="preserve">
+    <value>Have an account already? </value>
+  </data>
+  <data name="MessageForErrorIncorrectEmail" xml:space="preserve">
+    <value>Incorrect email address!</value>
+  </data>
+  <data name="MessageForErrorRequiredEmail" xml:space="preserve">
+    <value>Enter your email!</value>
+  </data>
+  <data name="MessageForErrorRequiredPassword" xml:space="preserve">
+    <value>Enter your password!</value>
+  </data>
+  <data name="MessageForNotTheSamePasswords" xml:space="preserve">
+    <value>Passwords do not match!</value>
+  </data>
+  <data name="MessageForErrorRequiredTerms" xml:space="preserve">
+    <value>You must accept Terms &amp; Conditions to continue!</value>
+  </data>
+  <data name="MessageForAlreadyExistingEmail" xml:space="preserve">
+    <value>Email address is already taken!</value>
+  </data>
+  <data name="MessageForErrorMatchingPasswords" xml:space="preserve">
+    <value>Passwords do not match!</value>
+  </data>
+  <data name="MessageForErrorRequiredName" xml:space="preserve">
+    <value>Enter your name!</value>
+  </data>
+  <data name="LabelForIncomeType" xml:space="preserve">
+    <value>Type of the income</value>
+  </data>
+  <data name="LabelForComeName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="LabelForAmount" xml:space="preserve">
+    <value>Amount</value>
+  </data>
+  <data name="LabelForSavingType" xml:space="preserve">
+    <value>Saving</value>
+  </data>
+  <data name="LabelForSalaryType" xml:space="preserve">
+    <value>Salary</value>
+  </data>
+  <data name="LabelForGiftType" xml:space="preserve">
+    <value>Gift</value>
+  </data>
+  <data name="TextForChangingLanguage" xml:space="preserve">
+    <value>Change language</value>
+  </data>
+</root>

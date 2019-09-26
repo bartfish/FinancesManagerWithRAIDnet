@@ -1,0 +1,85 @@
+﻿@model FMBusiness.ViewModels.DashboardVModels.DashboardVModel
+@using Resources
+
+    <section id="summary-boxes-container" class="col-md-12">
+
+        <header>
+            <h6>@Resources.TitleForDashboardSummary</h6>
+        </header>
+
+        <div class="summary-box col-md-3 orange-line">
+
+            <p class="amount-title">@Model.CurrentBudget @Model.CurrencyLabel</p>
+            <p class="amount-description">@Resources.TextForCurrent</p>
+
+        </div>
+
+        <div class="summary-box col-md-2 green-line">
+
+            <p class="amount-title">@Model.IncomesSum @Model.CurrencyLabel</p>
+            <p class="amount-description">@Resources.TextForIncome</p>
+
+        </div>
+
+        <div class="summary-box col-md-2 red-line">
+
+            <p class="amount-title">@Model.OutcomesSum @Model.CurrencyLabel</p>
+            <p class="amount-description">@Resources.TextForOutcome</p>
+
+        </div>
+
+        <div class="summary-box col-md-3 blue-line">
+
+            <p class="amount-title">@Model.IncomesSumSavings @Model.CurrencyLabel</p>
+            <p class="amount-description">@Resources.TextForSaved</p>
+
+        </div>
+
+    </section>
+
+
+    <section id="graphs" class="col-md-12">
+
+        <header>
+            <h6>@Resources.TitleForDashboardGraphs</h6>
+        </header>
+
+        <div class="col-md-6 custom-time-graph">
+            <header>
+                <h4></h4>
+            </header>
+
+            <div class="graph"></div>
+
+        </div>
+
+        <div class="col-md-5 all-time-graph">
+            <header>
+                <h4></h4>
+            </header>
+
+            <div class="graph"></div>
+
+        </div>
+
+    </section>
+
+    <script>
+
+        function SwitchCurrencyJS() {
+
+            $("#selectCurrency").on("change", function (e) {
+                console.log("Method called");
+                $.ajax({
+                    url: '@Url.Action("SwitchCurrencyForDashboard","Dashboard")',
+                    type: "Get",
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+        }
+
+        SwitchCurrencyJS();
+
+    </script>

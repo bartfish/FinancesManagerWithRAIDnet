@@ -1,0 +1,38 @@
+﻿@{
+    Layout = null;
+}
+
+    <header>
+        <h4>
+            @Resources.TextForAdding
+        </h4>
+    </header>
+
+    <div class="col-md-12 choice-container">
+
+        @Ajax.ActionLinkInnerHtml(
+    "<div class=\"col-md-5\"><p class=\"title\"><span class=\"fa fa-angle-double-up\"></span>" + Resources.TextForIncome + "</p></div>",
+    "_CreateIncome",
+    "Incomes", null,
+    new AjaxOptions()
+    {
+        HttpMethod = "Get",
+        UpdateTargetId = "adder-content"
+       // OnBegin = "ContainerManager.ShowLoadingAnimation",
+       // OnComplete = "ContainerManager.HideLoadingAnimation"
+    }, null)
+
+
+        @Ajax.ActionLinkInnerHtml(
+    "<div class=\"col-md-5\"><p class=\"title\"><span class=\"fa fa-angle-double-down\"></span>" + Resources.TextForOutcome + "</p></div>",
+    "_CreateOutcome", 
+    "Outcomes", null,
+    new AjaxOptions()
+    {
+        HttpMethod = "Get",
+        UpdateTargetId = "adder-content",
+      //  OnBegin = "ContainerManager.ShowLoadingAnimation"
+      //  OnComplete = "ContainerManager.HideLoadingAnimation"
+    }, null)
+
+    </div>

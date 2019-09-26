@@ -1,0 +1,31 @@
+﻿
+<p>Incomes graphs</p>
+
+<script>
+window.onload = function () {
+
+    var chart = new CanvasJS.Chart("chartContainer", {
+	    animationEnabled: true,
+	    title: {
+		    text: "Ice Cream Sales Over a Month"
+	    },
+	    axisX: {
+		    valueFormatString: "DD MMM"
+	    },
+	    axisY: {
+		    title: "Sales (in USD)",
+		    prefix: "$",
+		    includeZero: false
+	    },
+	    data: [{
+		    type: "spline",
+		    xValueType: "dateTime",
+		    xValueFormatString: "DD MMM",
+		    yValueFormatString: "$#,###",
+		    dataPoints: @Html.Raw(ViewBag.DataPoints)
+	    }]
+    });
+    chart.render();
+
+}
+</script>

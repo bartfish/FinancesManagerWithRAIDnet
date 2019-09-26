@@ -1,0 +1,234 @@
+﻿@model FMBusiness.ViewModels.DashboardVModels.FinancesVModels.IncomeVModels.ViewIncomeVModel
+@using PagedList;
+@using PagedList.Mvc;
+
+@{
+
+<div id="table-content">
+    @using (
+        Ajax.BeginForm
+            (
+                "_GetIncomes",
+                new
+                {
+                    page = ViewBag.pageIndex,
+                    pageSize = ViewBag.pageSize,
+                    sOrderByColumn = ViewBag.sOrderByColumn
+                },
+                new AjaxOptions
+                {
+                    UpdateTargetId = "table-content",
+                    HttpMethod = WebRequestMethods.Http.Get,
+                    AllowCache = false,
+                    InsertionMode = InsertionMode.Replace,
+
+                    OnBegin = "ContainerManager.ShowContentLoadingAnimation",
+                    OnComplete = "ContainerManager.HideContentLoadingAnimation"
+                },
+                    new { id = "incomesContentTableForm" }
+            )
+        )
+    {
+        <table class="table table-fixed">
+
+            <thead>
+                <tr>
+                    <th>
+                        @Ajax.ActionLink(
+                        Resources.TextForIncomeName, "_GetIncomes",
+                        new {
+                            page = ViewBag.pageIndex,
+                            pageSize = ViewBag.pageSize,
+                            sOrderByColumn =
+                                ViewBag.sOrderByColumn == "Name" || ViewBag.sOrderByColumn == "NameDesc"
+                                ?
+                                ViewBag.sOrderByColumn : "Name",
+
+                            searchString = ViewBag.searchString,
+                            isBeingExported = false
+                        },
+                        new AjaxOptions() {
+                            HttpMethod = WebRequestMethods.Http.Get,
+                            AllowCache = false,
+                            InsertionMode = InsertionMode.Replace,
+                            UpdateTargetId = "view-content"
+                        })
+
+                        @if (ViewBag.sOrderByColumn == "Name")
+                        {
+                            <span class="fa fa-arrow-up"></span>
+                        }
+                        else if (ViewBag.sOrderByColumn == "NameDesc")
+                        {
+                            <span class="fa fa-arrow-down"></span>
+                        }
+
+                        @Html.TextBoxFor(m => Model.SearchIncomes.Name, "", new { @placeholder = "" })
+                    </th>
+
+                    <th>
+                        @Ajax.ActionLink(
+                        Resources.TextForIncomeAmount, "_GetIncomes",
+                        new FMBusiness.ViewModels.DashboardVModels.FinancesVModels.IncomeVModels.ViewIncomeVModel() {
+                            Page = (int)ViewBag.pageIndex,
+                            PageSize = (int)ViewBag.pageSize,
+                            SOrderByColumn =
+                                ViewBag.sOrderByColumn == "Amount" || ViewBag.sOrderByColumn == "AmountDesc"
+                                ?
+                                ViewBag.sOrderByColumn : "Amount"
+                        },
+                        new AjaxOptions() {
+                            HttpMethod = WebRequestMethods.Http.Get,
+                            AllowCache = false,
+                            InsertionMode = InsertionMode.Replace,
+                            UpdateTargetId = "view-content"
+                        })
+
+                        @if (ViewBag.sOrderByColumn == "Amount")
+                        {
+                            <span class="fa fa-arrow-up"></span>
+                        }
+                        else if (ViewBag.sOrderByColumn == "AmountDesc")
+                        {
+                            <span class="fa fa-arrow-down"></span>
+                        }
+
+                        @Html.TextBoxFor(m => Model.SearchIncomes.Amount, "", new { @placeholder = "" })
+                    </th>
+
+                    <th class="@(ViewBag.sOrderByColumn == "IncomeType" || ViewBag.sOrderByColumn == "IncomeTypeDesc" ? "active" : "")">
+                        @Ajax.ActionLink(
+                        Resources.TextForIncomesType, "_GetIncomes",
+                        new FMBusiness.ViewModels.DashboardVModels.FinancesVModels.IncomeVModels.ViewIncomeVModel()
+                        {
+                            Page = (int)ViewBag.pageIndex,
+                            PageSize = (int)ViewBag.pageSize,
+                            SOrderByColumn =
+                                ViewBag.sOrderByColumn == "IncomeType" || ViewBag.sOrderByColumn == "IncomeTypeDesc"
+                                ?
+                                ViewBag.sOrderByColumn : "IncomeType"
+                        },
+                        new AjaxOptions() {
+                            HttpMethod = WebRequestMethods.Http.Get,
+                            AllowCache = false,
+                            InsertionMode = InsertionMode.Replace,
+                            UpdateTargetId = "view-content"
+                        })
+
+                        @if (ViewBag.sOrderByColumn == "IncomeType")
+                        {
+                            <span class="fa fa-arrow-up"></span>
+                        }
+                        else if (ViewBag.sOrderByColumn == "IncomeTypeDesc")
+                        {
+                            <span class="fa fa-arrow-down"></span>
+                        }
+                        @Html.EnumDropDownListFor(m => Model.SearchIncomes.IncomeType, "", new { @placeholder = "" })
+                    </th>
+
+                    <th class="@(ViewBag.sOrderByColumn == "InsertTime" || ViewBag.sOrderByColumn == "InsertTimeDesc" ? "active" : "")">
+                        @Ajax.ActionLink(
+                        Resources.TextForIncomeInsertTime, "_GetIncomes",
+                        new FMBusiness.ViewModels.DashboardVModels.FinancesVModels.IncomeVModels.ViewIncomeVModel()
+                        {
+                            Page = (int)ViewBag.pageIndex,
+                            PageSize = (int)ViewBag.pageSize,
+                            SOrderByColumn =
+                                ViewBag.sOrderByColumn == "InsertTime" || ViewBag.sOrderByColumn == "InsertTimeDesc"
+                                ?
+                                ViewBag.sOrderByColumn : "InsertTime"
+                        },
+                        new AjaxOptions() {
+                            HttpMethod = WebRequestMethods.Http.Get,
+                            AllowCache = false,
+                            InsertionMode = InsertionMode.Replace,
+                            UpdateTargetId = "view-content"
+                        })
+
+                        @if (ViewBag.sOrderByColumn == "InsertTime")
+                        {
+                            <span class="fa fa-arrow-up"></span>
+                        }
+                        else if (ViewBag.sOrderByColumn == "InsertTimeDesc")
+                        {
+                            <span class="fa fa-arrow-down"></span>
+                        }
+                        @Html.TextBoxFor(m => Model.SearchIncomes.InsertTime, "", new { @placeholder = "e.g. 2018-10-24" })
+                    </th>
+
+                </tr>
+            </thead>
+            
+            <tbody>
+
+                @foreach (var income in Model.IncomesList)
+                {
+                    <tr>
+                        <td data-label="Income name">
+                            @Html.DisplayFor(modelItem => income.Name)
+                        </td>
+
+                        <td data-label="Amount">
+                            @Html.DisplayFor(modelItem => income.Amount)
+                        </td>
+
+                        <td data-label="IncomeType">
+                            @Html.DisplayFor(modelItem => income.IncomeType)
+                        </td>
+
+                        <td data-label="InsertTime">
+                            @Html.DisplayFor(modelItem => income.InsertTime)
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+        <div id="contentPager">
+
+            @Html.PagedListPager(
+            Model.IncomesList,
+            page => Url.Action("_GetIncomes", "Incomes",
+            new
+            {
+                page,
+                pageSize = ViewBag.pageSize,
+                sOrderByColumn = ViewBag.sOrderByColumn
+            }),
+            PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(
+            new AjaxOptions
+            {
+                UpdateTargetId = "table-content",
+                HttpMethod = WebRequestMethods.Http.Get,
+                AllowCache = false,
+                InsertionMode = InsertionMode.Replace,
+
+                OnBegin = "ContainerManager.ShowContentLoadingAnimation",
+                OnComplete = "ContainerManager.HideContentLoadingAnimation"
+
+            }))
+
+        </div>
+
+        <div class="table-options">
+            @*Html.ActionLink("Export to PDF", "ExportToPdf", "Incomes", new
+                {
+                    sOrderByColumn = ViewBag.sOrderByColumn,
+                    searchString = ViewBag.searchString
+                }, null)*@
+
+            @Html.ActionLink(Resources.ActionExportToCSV, "ExportToCsv", "Incomes",
+                new
+                {
+                    sOrderByColumn = ViewBag.sOrderByColumn
+                }, null)
+        </div>
+
+    }
+
+</div>
+
+}
