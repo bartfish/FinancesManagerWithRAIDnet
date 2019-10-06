@@ -22,7 +22,7 @@ namespace FmWebApp.Controllers
         [UserLoggedProtection]
         public ActionResult Login()
         {
-            //HostCommunication.Managers.DbManager.InitializeBackup();
+            HostCommunication.Managers.DbManager.InitializeBackup();
 
             Session["USER_ID"] = null;
             LoginVModel UserLogin = new LoginVModel();

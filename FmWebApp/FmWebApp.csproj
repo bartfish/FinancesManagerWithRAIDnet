@@ -72,6 +72,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.SqlClient, Version=4.6.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SqlClient.4.7.0\lib\net461\System.Data.SqlClient.dll</HintPath>
+    </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -224,7 +227,9 @@
     <Content Include="Scripts\umd\popper-utils.min.js" />
     <Content Include="Scripts\umd\popper.js" />
     <Content Include="Scripts\umd\popper.min.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -281,6 +286,10 @@
     <ProjectReference Include="..\FMDataModel\FMDataModel.csproj">
       <Project>{82CA0A1B-0F75-48A3-AF0C-C87FBDBBF0E9}</Project>
       <Name>FMDataModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HostCommunication\HostCommunication.csproj">
+      <Project>{3adc7ce9-f28f-4e1a-b442-c4b5a234b41b}</Project>
+      <Name>HostCommunication</Name>
     </ProjectReference>
     <ProjectReference Include="..\Resources\Resources.csproj">
       <Project>{03DA412F-D25A-4A7F-A9DA-A95E1E5B756D}</Project>
