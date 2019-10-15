@@ -85,9 +85,7 @@ namespace HostCommunication.Managers
                 throw;
             }
             return dbExists;
-        }
-
-               
+        }       
     }
 }
 
