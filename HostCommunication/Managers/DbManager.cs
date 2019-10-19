@@ -16,7 +16,6 @@ namespace HostCommunication.Managers
 
         private static void InitializeLists()
         {
-           // _listOfDbs.Add(ConfigurationManager.AppSettings["DbMasterDatabase"]);
             _listOfDbs.Add(ConfigurationManager.AppSettings["D0_Database"]);
             _listOfDbs.Add(ConfigurationManager.AppSettings["D1_Database"]);
 
@@ -30,7 +29,10 @@ namespace HostCommunication.Managers
             var listOfDbDescriptions = CheckDatabasesExistence();
             foreach (var dbDescription in listOfDbDescriptions)
             {
-                RunSqlOnDatabases(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
+                if (!dbDescription.Exists)
+                {
+                    RunSqlOnDatabases(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
+                }
             }
         }
 
