@@ -18,7 +18,7 @@ namespace HostCommunication.Managers
             {
                 foreach (var table in dbTables)
                 {
-                    var tableFromModel = Set(GetType(table);
+                    //var tableFromModel = Set(GetType(table);
                 }
             }
         }
