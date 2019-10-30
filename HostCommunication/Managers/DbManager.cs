@@ -6,6 +6,7 @@ using System.Configuration;
 using System.IO;
 using System.Text.RegularExpressions;
 using HostCommunication.HostModels;
+using System.Data;
 
 namespace HostCommunication.Managers
 {
@@ -18,13 +19,15 @@ namespace HostCommunication.Managers
         {
             _listOfDbs.Add(ConfigurationManager.AppSettings["D0_Database"]);
             _listOfDbs.Add(ConfigurationManager.AppSettings["D1_Database"]);
+            _listOfDbs.Add(ConfigurationManager.AppSettings["D2_Database"]);
+            _listOfDbs.Add(ConfigurationManager.AppSettings["D3_Database"]);
 
             _listOfServers.Add(ConfigurationManager.AppSettings["DbServer_One"]);
             _listOfServers.Add(ConfigurationManager.AppSettings["DbServer_Two"]);         
         }
 
 
-        public static void InitializeBackup()
+        public static void PrepareRAID()
         {
             var listOfDbDescriptions = CheckDatabasesExistence();
             foreach (var dbDescription in listOfDbDescriptions)
@@ -34,15 +37,65 @@ namespace HostCommunication.Managers
                     RunSqlOnDatabases(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
                 }
             }
+
+            spreadData();
+
         }
+
+        private static void spreadData()
+        {
+            // fetch all data from each table from master database
+
+            string[] tables = fetchAllTables();
+            DataTable dataTable = new DataTable();
+
+            foreach (var table in tables)
+            {
+                string sqlGetAllDataFromTable = string.Format("SELECT * FROM {0}.dbo.{1}", ConfigurationManager.AppSettings["DbMasterDatabase"], table);
+                using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(ConfigurationManager.AppSettings["DbServer_One"]))
+                {
+                    SqlCommand cmd = new SqlCommand(sqlGetAllDataFromTable, conn);
+                    conn.Open();
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    da.Fill(dataTable);
+                    var a = dataTable;
+
+                    foreach(var DataRow in dataTable.Rows)
+                    {
+
+                    }
+
+                    conn.Close();
+                    da.Dispose();
+                }
+
+
+            }
+
+            // build insert sql query for each table (2 inserts per table, each containing half of the data)
+
+            // run sql queries on each database
+        }
+        private static string[] fetchAllTables()
+        {
+            List<string> values = new List<string>();
+            foreach (string key in ConfigurationManager.AppSettings)
+            {
+                if (key.StartsWith("Table"))
+                {
+                    string value = ConfigurationManager.AppSettings[key];
+                    values.Add(value);
+                }
+            }
+            return values.ToArray();
+        }
+
 
         private static string loadPreparedSqlQueryForDbCreation(string sqlDirectoryToModify, string dbName)
         {
             string script = File.ReadAllText(sqlDirectoryToModify);
             script = script.Replace("fmWebApp", dbName);
-
-            // set database sizes based on the number of datbases to create
-
+            
             return script;
         }
 
@@ -79,6 +132,7 @@ namespace HostCommunication.Managers
 
             }
         }
+       
 
         private static List<DbDescription> CheckDatabasesExistence()
         {
@@ -89,6 +143,7 @@ namespace HostCommunication.Managers
             List<DbDescription> dbDescriptions = new List<DbDescription>();
             try
             {
+                int counter = 0, serverNum = 0;
                 foreach (var currentServer in _listOfServers)
                 {
                     // establish connection with the first server and check if specific databases are in there
@@ -96,10 +151,19 @@ namespace HostCommunication.Managers
                     {
                         conn.Open();
 
-                        foreach (var db in _listOfDbs)
+                        for(int i = counter; i < _listOfDbs.Count; i++)
                         {
+                            if (serverNum == 0)
+                            {
+                                if (counter >= 2)
+                                {
+                                    serverNum++;
+                                    break;
+                                }
+                            }
+                            
                             // check if on this server, there exist all databases
-                            string sqlDbIsOnTheServer = string.Format("SELECT database_id FROM sys.databases WHERE Name = '{0}'", db);
+                            string sqlDbIsOnTheServer = string.Format("SELECT database_id FROM sys.databases WHERE Name = '{0}'", _listOfDbs[i]);
                             using (SqlCommand sqlCmd = new SqlCommand(sqlDbIsOnTheServer, conn))
                             {
                                 var foundRow = sqlCmd.ExecuteScalar();
@@ -111,18 +175,19 @@ namespace HostCommunication.Managers
 
                                 dbDescriptions.Add(new DbDescription()
                                 {
-                                    Name = db,
+                                    Name = _listOfDbs[i],
                                     Server = currentServer,
                                     Exists = dbExists,
                                     IsActive = dbExists
                                 });
                             }
+                            counter++;
                         }
                         conn.Close();
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 throw;
