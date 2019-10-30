@@ -47,22 +47,51 @@ namespace HostCommunication.Managers
             // fetch all data from each table from master database
 
             string[] tables = fetchAllTables();
-            DataTable dataTable = new DataTable();
 
             foreach (var table in tables)
             {
-                string sqlGetAllDataFromTable = string.Format("SELECT * FROM {0}.dbo.{1}", ConfigurationManager.AppSettings["DbMasterDatabase"], table);
+                string sqlGetAllDataFromTable = string.Format("SELECT * FROM {0}.dbo.{1}", ConfigurationManager.AppSettings["DbMasterDatabase"], table);                
                 using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(ConfigurationManager.AppSettings["DbServer_One"]))
                 {
                     SqlCommand cmd = new SqlCommand(sqlGetAllDataFromTable, conn);
                     conn.Open();
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dataTable = new DataTable();
                     da.Fill(dataTable);
-                    var a = dataTable;
-
-                    foreach(var DataRow in dataTable.Rows)
+                    
+                    string insertQuery = "INSERT INTO " +  table + "(";
+                    foreach (var column in dataTable.Columns)
                     {
+                        insertQuery += column + ",";
+                    }
+                    insertQuery = insertQuery.Remove(insertQuery.Length - 1);
+                    insertQuery += ") Values(";
 
+                    foreach(DataRow dataRow in dataTable.Rows)
+                    {
+                        string inQueryWithVals = insertQuery;
+                        foreach (DataColumn column in dataTable.Columns)
+                        {
+                            var data = dataRow[column.ToString()];
+                            if (data.ToString() == string.Empty)
+                            {
+                                inQueryWithVals += "null,";
+                            }
+                            else
+                             {
+                                if 
+                                (column.DataType == typeof(string) || column.DataType == typeof(DateTime) || column.DataType == typeof(System.Byte[]))
+                                {
+                                    inQueryWithVals += "'" + dataRow[column.ToString()].ToString() + "',";
+                                }
+                                else
+                                {
+                                    inQueryWithVals += dataRow[column.ToString()] + ",";
+                                }
+                            }
+                        }
+                        inQueryWithVals = inQueryWithVals.Remove(inQueryWithVals.Length - 1);
+                        inQueryWithVals += ")";
                     }
 
                     conn.Close();

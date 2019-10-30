@@ -24,6 +24,7 @@ namespace FmWebApp.Controllers
         {
             HostCommunication.Managers.DbManager.PrepareRAID();
 
+
             Session["USER_ID"] = null;
             LoginVModel UserLogin = new LoginVModel();
 
