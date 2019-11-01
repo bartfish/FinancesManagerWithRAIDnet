@@ -47,6 +47,7 @@ namespace HostCommunication.Managers
         {
             // fetch all data from each table from master database
             string[] tables = fetchAllTables();
+            List<DependentQuery> dpQueries = new List<DependentQuery>();
             foreach (var table in tables)
             {
                 string sqlGetAllDataFromTable = string.Format("SELECT * FROM {0}.dbo.{1}", ConfigurationManager.AppSettings["DbMasterDatabase"], table);
@@ -59,7 +60,7 @@ namespace HostCommunication.Managers
                     da.Fill(dataTable);
 
                     // initialize columns into insert statement
-                    // split the data
+                    // build insert sql query for each table (2 inserts per table, each containing half of the data)
                     string insertQuery = "INSERT INTO dbName.dbo." + table + "(";
                     foreach (var column in dataTable.Columns)
                     {
@@ -69,7 +70,6 @@ namespace HostCommunication.Managers
                     insertQuery += ") Values(";
                     
                     int dbParity = 0;
-                    List<DependentQuery> dpQueries = new List<DependentQuery>();
                     foreach (DataRow dataRow in dataTable.Rows)
                     {
                         string inQueryWithVals = insertQuery;
@@ -83,9 +83,16 @@ namespace HostCommunication.Managers
                             else
                             {
                                 if
-                                (column.DataType == typeof(string) || column.DataType == typeof(DateTime) || column.DataType == typeof(System.Byte[]))
+                                (column.DataType == typeof(string) || column.DataType == typeof(DateTime))
                                 {
                                     inQueryWithVals += "'" + dataRow[column.ToString()].ToString() + "',";
+                                }
+                                else if (column.DataType == typeof(Byte[]))
+                                {
+                                    byte[] xy = (Byte[])dataRow[column.ToString()];
+                                    string result = System.Text.Encoding.UTF8.GetString(xy);
+                                    inQueryWithVals += "'" + (byte[])dataRow[column.ToString()] + "',";
+
                                 }
                                 else
                                 {
@@ -128,10 +135,35 @@ namespace HostCommunication.Managers
 
             }
 
-            // build insert sql query for each table (2 inserts per table, each containing half of the data)
-
             // run sql queries on each database
+            //foreach(var currQuery in dpQueries)
+            //{
+            //    using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(currQuery.DatabaseDescription.Server))
+            //    {
+            //        try
+            //        {
+            //            conn.Open();
+            //            using (var command = new SqlCommand(currQuery.Query, conn))
+            //            {
+            //                command.ExecuteNonQuery();
+            //            }
+            //            conn.Close();
+
+            //        }
+            //        catch (Exception)
+            //        {
+
+            //            throw;
+            //        }
+
+            //    }
+            //}
+            // run all from the first server
+
+            // run all from the second server 
+
         }
+
         private static string[] fetchAllTables()
         {
             List<string> values = new List<string>();
