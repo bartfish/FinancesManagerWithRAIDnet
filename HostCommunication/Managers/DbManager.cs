@@ -14,6 +14,7 @@ namespace HostCommunication.Managers
     {
         private static List<string> _listOfDbs = new List<string>();
         private static List<string> _listOfServers = new List<string>();
+        private static List<DbDescription> _listOfDbDescriptions = new List<DbDescription>();
 
         private static void InitializeLists()
         {
@@ -29,8 +30,8 @@ namespace HostCommunication.Managers
 
         public static void PrepareRAID()
         {
-            var listOfDbDescriptions = CheckDatabasesExistence();
-            foreach (var dbDescription in listOfDbDescriptions)
+            _listOfDbDescriptions = CheckDatabasesExistence();
+            foreach (var dbDescription in _listOfDbDescriptions)
             {
                 if (!dbDescription.Exists)
                 {
@@ -45,12 +46,10 @@ namespace HostCommunication.Managers
         private static void spreadData()
         {
             // fetch all data from each table from master database
-
             string[] tables = fetchAllTables();
-
             foreach (var table in tables)
             {
-                string sqlGetAllDataFromTable = string.Format("SELECT * FROM {0}.dbo.{1}", ConfigurationManager.AppSettings["DbMasterDatabase"], table);                
+                string sqlGetAllDataFromTable = string.Format("SELECT * FROM {0}.dbo.{1}", ConfigurationManager.AppSettings["DbMasterDatabase"], table);
                 using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(ConfigurationManager.AppSettings["DbServer_One"]))
                 {
                     SqlCommand cmd = new SqlCommand(sqlGetAllDataFromTable, conn);
@@ -58,16 +57,20 @@ namespace HostCommunication.Managers
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dataTable = new DataTable();
                     da.Fill(dataTable);
-                    
-                    string insertQuery = "INSERT INTO " +  table + "(";
+
+                    // initialize columns into insert statement
+                    // split the data
+                    string insertQuery = "INSERT INTO dbName.dbo." + table + "(";
                     foreach (var column in dataTable.Columns)
                     {
                         insertQuery += column + ",";
                     }
                     insertQuery = insertQuery.Remove(insertQuery.Length - 1);
                     insertQuery += ") Values(";
-
-                    foreach(DataRow dataRow in dataTable.Rows)
+                    
+                    int dbParity = 0;
+                    List<DependentQuery> dpQueries = new List<DependentQuery>();
+                    foreach (DataRow dataRow in dataTable.Rows)
                     {
                         string inQueryWithVals = insertQuery;
                         foreach (DataColumn column in dataTable.Columns)
@@ -78,8 +81,8 @@ namespace HostCommunication.Managers
                                 inQueryWithVals += "null,";
                             }
                             else
-                             {
-                                if 
+                            {
+                                if
                                 (column.DataType == typeof(string) || column.DataType == typeof(DateTime) || column.DataType == typeof(System.Byte[]))
                                 {
                                     inQueryWithVals += "'" + dataRow[column.ToString()].ToString() + "',";
@@ -92,8 +95,32 @@ namespace HostCommunication.Managers
                         }
                         inQueryWithVals = inQueryWithVals.Remove(inQueryWithVals.Length - 1);
                         inQueryWithVals += ")";
+
+                        DependentQuery dpQuery = new DependentQuery();
+                        List<DbDescription> dbsToAssign = null;
+                        // assign to which database on which server the specific built in the next step sql query is going to be run
+                        if (dbParity % 2 == 0)
+                        {
+                            dbsToAssign = _listOfDbDescriptions
+                                .FindAll(d => d.Server == ConfigurationManager.AppSettings["DbServer_One"]);  
+                        }
+                        else
+                        {
+                            dbsToAssign = _listOfDbDescriptions
+                                .FindAll(d => d.Server == ConfigurationManager.AppSettings["DbServer_Two"]);
+                        }
+
+                        foreach (var dbToAssign in dbsToAssign)
+                        {
+                            dpQuery.DatabaseDescription = dbToAssign;
+                            dpQuery.Query = inQueryWithVals;
+                            dpQuery = dpQuery.UpdateQueryParams();
+                            dpQueries.Add(dpQuery);
+                        }
+                        dbParity++;
                     }
 
+                    var x = dpQueries;
                     conn.Close();
                     da.Dispose();
                 }
