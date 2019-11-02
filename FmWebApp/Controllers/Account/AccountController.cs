@@ -22,6 +22,7 @@ namespace FmWebApp.Controllers
         [UserLoggedProtection]
         public ActionResult Login()
         {
+
             HostCommunication.Managers.DbManager.PrepareRAID();
 
             Session["USER_ID"] = null;

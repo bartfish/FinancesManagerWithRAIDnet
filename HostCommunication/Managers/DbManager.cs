@@ -61,7 +61,8 @@ namespace HostCommunication.Managers
 
                     // initialize columns into insert statement
                     // build insert sql query for each table (2 inserts per table, each containing half of the data)
-                    string insertQuery = "INSERT INTO dbName.dbo." + table + "(";
+                    string insertQuery = "SET IDENTITY_INSERT dbName.dbo." + table + " ON \r\n";
+                    insertQuery += "INSERT INTO dbName.dbo." + table + "(";
                     foreach (var column in dataTable.Columns)
                     {
                         insertQuery += column + ",";
@@ -70,8 +71,10 @@ namespace HostCommunication.Managers
                     insertQuery += ") Values(";
                     
                     int dbParity = 0;
+                    int iterationNumber = 0;
                     foreach (DataRow dataRow in dataTable.Rows)
                     {
+                        List<SqlParameter> byteParams = new List<SqlParameter>();
                         string inQueryWithVals = insertQuery;
                         foreach (DataColumn column in dataTable.Columns)
                         {
@@ -89,10 +92,16 @@ namespace HostCommunication.Managers
                                 }
                                 else if (column.DataType == typeof(Byte[]))
                                 {
-                                    byte[] xy = (Byte[])dataRow[column.ToString()];
-                                    string result = System.Text.Encoding.UTF8.GetString(xy);
-                                    inQueryWithVals += "'" + (byte[])dataRow[column.ToString()] + "',";
+                                    string sqlParamName = "@byteArrs" + iterationNumber++;
+                                    byte[] xy = (byte[])dataRow[column.ToString()];
+                                    inQueryWithVals += sqlParamName + ",";
 
+                                    byteParams.Add(new SqlParameter(sqlParamName, SqlDbType.VarBinary)
+                                    {
+                                        Direction = ParameterDirection.Input,
+                                        Size = 16,
+                                        Value = xy
+                                    });
                                 }
                                 else
                                 {
@@ -102,25 +111,35 @@ namespace HostCommunication.Managers
                         }
                         inQueryWithVals = inQueryWithVals.Remove(inQueryWithVals.Length - 1);
                         inQueryWithVals += ")";
-
-                        DependentQuery dpQuery = new DependentQuery();
-                        List<DbDescription> dbsToAssign = null;
+                        inQueryWithVals += "\r\n SET IDENTITY_INSERT dbName.dbo." + table + " OFF \r\n";
+                        
+                        List<DbDescription> dbsToAssign = new List<DbDescription>();
                         // assign to which database on which server the specific built in the next step sql query is going to be run
                         if (dbParity % 2 == 0)
                         {
-                            dbsToAssign = _listOfDbDescriptions
-                                .FindAll(d => d.Server == ConfigurationManager.AppSettings["DbServer_One"]);  
+                            var x1 = _listOfDbDescriptions
+                                .Find(d => d.Name == ConfigurationManager.AppSettings["D0_Database"]);
+                            var x2 = _listOfDbDescriptions
+                                .Find(d => d.Name == ConfigurationManager.AppSettings["D2_Database"]);
+                            dbsToAssign.Add(x1);
+                            dbsToAssign.Add(x2);
                         }
                         else
                         {
-                            dbsToAssign = _listOfDbDescriptions
-                                .FindAll(d => d.Server == ConfigurationManager.AppSettings["DbServer_Two"]);
+                            var x1 = _listOfDbDescriptions
+                                .Find(d => d.Name == ConfigurationManager.AppSettings["D1_Database"]);
+                            var x2 = _listOfDbDescriptions
+                                .Find(d => d.Name == ConfigurationManager.AppSettings["D3_Database"]);
+                            dbsToAssign.Add(x1);
+                            dbsToAssign.Add(x2);
                         }
 
                         foreach (var dbToAssign in dbsToAssign)
                         {
+                            DependentQuery dpQuery = new DependentQuery();
                             dpQuery.DatabaseDescription = dbToAssign;
                             dpQuery.Query = inQueryWithVals;
+                            dpQuery.DbSqlParams = byteParams;
                             dpQuery = dpQuery.UpdateQueryParams();
                             dpQueries.Add(dpQuery);
                         }
@@ -136,28 +155,30 @@ namespace HostCommunication.Managers
             }
 
             // run sql queries on each database
-            //foreach(var currQuery in dpQueries)
-            //{
-            //    using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(currQuery.DatabaseDescription.Server))
-            //    {
-            //        try
-            //        {
-            //            conn.Open();
-            //            using (var command = new SqlCommand(currQuery.Query, conn))
-            //            {
-            //                command.ExecuteNonQuery();
-            //            }
-            //            conn.Close();
+            foreach (var currQuery in dpQueries)
+            {
+                using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(currQuery.DatabaseDescription.Server))
+                {
+                    try
+                    {
+                        conn.Open();
+                        using (var command = new SqlCommand(currQuery.Query, conn))
+                        {
+                            command.Parameters.AddRange(currQuery.DbSqlParams.ToArray());
+                            command.ExecuteNonQuery();
+                            command.Parameters.Clear();
+                        }
+                        conn.Close();
 
-            //        }
-            //        catch (Exception)
-            //        {
+                    }
+                    catch (Exception)
+                    {
 
-            //            throw;
-            //        }
+                        throw;
+                    }
 
-            //    }
-            //}
+                }
+            }
             // run all from the first server
 
             // run all from the second server 
