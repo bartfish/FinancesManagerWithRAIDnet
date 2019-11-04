@@ -27,7 +27,6 @@ namespace HostCommunication.Managers
             _listOfServers.Add(ConfigurationManager.AppSettings["DbServer_Two"]);         
         }
 
-
         public static void PrepareRAID()
         {
             _listOfDbDescriptions = CheckDatabasesExistence();
@@ -199,7 +198,6 @@ namespace HostCommunication.Managers
             return values.ToArray();
         }
 
-
         private static string loadPreparedSqlQueryForDbCreation(string sqlDirectoryToModify, string dbName)
         {
             string script = File.ReadAllText(sqlDirectoryToModify);
@@ -242,7 +240,6 @@ namespace HostCommunication.Managers
             }
         }
        
-
         private static List<DbDescription> CheckDatabasesExistence()
         {
             bool dbExists = false;
