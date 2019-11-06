@@ -29,7 +29,19 @@ namespace HostCommunication.Managers
 
         public static void PrepareRAID()
         {
-            _listOfDbDescriptions = CheckDatabasesExistence();
+            _listOfDbDescriptions = CheckDatabasesExistence(); // initializing the list of databases
+
+            for (int i = 0; i < _listOfDbDescriptions.Count; i++) // informing each database about its mirrors
+            {
+                var mirrorDbs = _listOfDbDescriptions.FindAll(db => db.Server == _listOfDbDescriptions[i].Server && db.Name != _listOfDbDescriptions[i].Name);
+                foreach(var mirror in mirrorDbs)
+                {
+                    _listOfDbDescriptions[i].DbMirrors.Add(mirror);
+                }
+            }
+
+            DataOperationManager.InitializeDbsData(_listOfDbDescriptions);
+
             foreach (var dbDescription in _listOfDbDescriptions)
             {
                 if (!dbDescription.Exists)
@@ -45,7 +57,7 @@ namespace HostCommunication.Managers
         private static void spreadData()
         {
             // fetch all data from each table from master database
-            string[] tables = fetchAllTables();
+            string[] tables = fetchAllTableNames();
             List<DependentQuery> dpQueries = new List<DependentQuery>();
             foreach (var table in tables)
             {
@@ -184,7 +196,7 @@ namespace HostCommunication.Managers
 
         }
 
-        private static string[] fetchAllTables()
+        private static string[] fetchAllTableNames()
         {
             List<string> values = new List<string>();
             foreach (string key in ConfigurationManager.AppSettings)
@@ -284,7 +296,7 @@ namespace HostCommunication.Managers
                                     Name = _listOfDbs[i],
                                     Server = currentServer,
                                     Exists = dbExists,
-                                    IsActive = dbExists
+                                    IsCurrentlyConnected = dbExists
                                 });
                             }
                             counter++;
@@ -299,7 +311,8 @@ namespace HostCommunication.Managers
                 throw;
             }
             return dbDescriptions;
-        }       
+        }
+
     }
 }
 

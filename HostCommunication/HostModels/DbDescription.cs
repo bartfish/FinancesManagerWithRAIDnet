@@ -12,10 +12,13 @@ namespace HostCommunication.HostModels
 
         public bool Exists { get; set; }
 
-        public bool IsActive { get; set; }
+        public bool IsCurrentlyConnected { get; set; }
 
         public int WorkingOrderWhenPaired { get; set; }
 
         public bool IsFromCurrentMaster { get; set; }
+
+        public List<DbDescription> DbMirrors { get; set; }
+
     }
 }

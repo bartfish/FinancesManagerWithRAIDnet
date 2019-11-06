@@ -4,6 +4,8 @@ using FMBusiness.ViewModels.IncomeVModels;
 using FMBusiness.ViewModels.OutcomeVModels;
 using FMDataModel.DataModels;
 using FMDataModel.Enums;
+using HostCommunication.HostModels;
+using HostCommunication.Managers;
 using log4net;
 using System;
 using System.Collections.Generic;
@@ -40,6 +42,8 @@ namespace FMBusiness.Managers
             }
             catch (Exception e)
             {
+                DataOperationManager.VerifyResult(new Func<CreateOutcomeVModel, bool>(SaveOutcome), new object[] { Outcome }, MethodReturnStatus.Error);
+
                 _log.ErrorFormat("There was an error with saving the outcome. Message: {0}, Stacktrace: {1}", e.Message, e.StackTrace);
                 return false;
             }
@@ -48,16 +52,25 @@ namespace FMBusiness.Managers
 
         public static double SumOutcomes()
         {
-            using (var model = new fmDbDataModel())
+            try
             {
-                var sum = model.fm_Outcomes
-                    .Where(o => o.UserId == UserSingleton.Instance.Id)
-                    .Select(o => o.Amount ?? 0)
-                    .DefaultIfEmpty()
-                    .Sum();
+                using (var model = new fmDbDataModel())
+                {
+                    var sum = model.fm_Outcomes
+                        .Where(o => o.UserId == UserSingleton.Instance.Id)
+                        .Select(o => o.Amount ?? 0)
+                        .DefaultIfEmpty()
+                        .Sum();
 
-                return sum;
+                    return sum;
+                }
             }
+            catch (Exception)
+            {
+                DataOperationManager.VerifyResult(new Func<null, double>(SumOutcomes), null, MethodReturnStatus.Error);
+                throw;
+            }
+
         }
 
         public static List<Outcome> GetOutcomes(string sOrderByColumn, SearchOutcomeVModel searchOutcomes)
