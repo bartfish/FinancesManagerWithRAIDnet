@@ -18,7 +18,9 @@ namespace HostCommunication.HostModels
 
         public bool IsFromCurrentMaster { get; set; }
 
-        public List<DbDescription> DbMirrors { get; set; }
+        public MirrorSide MirrorSide { get; set; }
+
+        public List<DbDescription> DbMirrors { get; set; } = new List<DbDescription>();
 
     }
 }

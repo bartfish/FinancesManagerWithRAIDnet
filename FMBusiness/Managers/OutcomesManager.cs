@@ -67,7 +67,7 @@ namespace FMBusiness.Managers
             }
             catch (Exception)
             {
-                DataOperationManager.VerifyResult(new Func<null, double>(SumOutcomes), null, MethodReturnStatus.Error);
+                DataOperationManager.VerifyResult(new Func<double>(SumOutcomes), null, MethodReturnStatus.Error);
                 throw;
             }
 

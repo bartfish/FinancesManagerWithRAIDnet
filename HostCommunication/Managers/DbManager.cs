@@ -33,7 +33,7 @@ namespace HostCommunication.Managers
 
             for (int i = 0; i < _listOfDbDescriptions.Count; i++) // informing each database about its mirrors
             {
-                var mirrorDbs = _listOfDbDescriptions.FindAll(db => db.Server == _listOfDbDescriptions[i].Server && db.Name != _listOfDbDescriptions[i].Name);
+                var mirrorDbs = _listOfDbDescriptions.FindAll(db => db.Server != _listOfDbDescriptions[i].Server && db.Name != _listOfDbDescriptions[i].Name);
                 foreach(var mirror in mirrorDbs)
                 {
                     _listOfDbDescriptions[i].DbMirrors.Add(mirror);
@@ -42,16 +42,48 @@ namespace HostCommunication.Managers
 
             DataOperationManager.InitializeDbsData(_listOfDbDescriptions);
 
+            bool dataToDistribute = false;
             foreach (var dbDescription in _listOfDbDescriptions)
             {
                 if (!dbDescription.Exists)
                 {
                     RunSqlOnDatabases(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
+                    dataToDistribute = true;
                 }
             }
 
-            spreadData();
+            if (dataToDistribute)
+            {
+                // delete all contents of all databases 
+                deleteData(); // -> existing or not just run delete *
+                spreadData();
+            }
 
+        }
+
+        private static void deleteData()
+        {
+            // fetch all data from each table from master database
+            string[] tables = fetchAllTableNames();
+            List<DependentQuery> dpQueries = new List<DependentQuery>();
+            // use initialized _listOfDbDescriptions to clear databasees
+            foreach (var server in _listOfServers)
+            {
+                foreach (var table in tables)
+                {
+
+                    string sqlDeleteDataFromTable = string.Format("DELETE FROM {0}.dbo.{1}", server, table); // should be called db.dbo.tableName
+                    using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(server))
+                    {
+                        conn.Open();
+                        var command = new SqlCommand(sqlDeleteDataFromTable, conn);
+                        command.ExecuteNonQuery();
+                        conn.Close();
+                    }
+
+
+                }
+            }
         }
 
         private static void spreadData()
@@ -296,7 +328,8 @@ namespace HostCommunication.Managers
                                     Name = _listOfDbs[i],
                                     Server = currentServer,
                                     Exists = dbExists,
-                                    IsCurrentlyConnected = dbExists
+                                    IsCurrentlyConnected = dbExists,
+                                    MirrorSide = (i % 2 == 0) ? MirrorSide.Left : MirrorSide.Right
                                 });
                             }
                             counter++;

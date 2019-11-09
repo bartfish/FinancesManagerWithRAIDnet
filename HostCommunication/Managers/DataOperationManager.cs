@@ -8,6 +8,7 @@ namespace HostCommunication.Managers
 {
     public static class DataOperationManager
     {
+        private static int errorCounter = 0; // if the value is the same as the number of databases return null to the user and to not allow for the operation to continue
         private static int numOfUpdatedDatabases = 0;
         private static DbDescription currentlyConnectedDb;
         private static List<DbDescription> _currentListOfDbs = new List<DbDescription>();
@@ -25,24 +26,26 @@ namespace HostCommunication.Managers
             {
                 // if everything went well 
                     // return to the method and continue its execution
+
             }
             else if (methodReturnStatus == MethodReturnStatus.Null)
             {
                 // if error occured
                 // switch webconfig to the mirror db from other server
+                SwitchToOtherPart();
                 // call the method once again
                 return calledMethod.DynamicInvoke(paramsSent);
             }
             else if (methodReturnStatus == MethodReturnStatus.Error)
             {
                 // if error occured
+                SwitchToMirror();
                 // switch webconfig to the mirror db from other server
 
                 // run the method once again
                 return calledMethod.DynamicInvoke(paramsSent);
             }
             return calledMethod.DynamicInvoke(paramsSent);
-
         }
 
         public static void InitializeDbsData(List<DbDescription> dbs)
@@ -50,16 +53,16 @@ namespace HostCommunication.Managers
             _currentListOfDbs = dbs;
         }
 
-        public static DbDescription SwitchToMirror(DbDescription currDb)
+        public static void SwitchToMirror()
         {
             // go to next mirror on the other server and return it
-            return new DbDescription();
+            
         }
 
-        public static DbDescription SwitchToOtherPart(DbDescription currDb)
+        public static void SwitchToOtherPart()
         {
             // go to other part of the databases on the same server
-            return new DbDescription();
+
         }
 
         public static string UpdateConnString(DbDescription newDbDescription)
