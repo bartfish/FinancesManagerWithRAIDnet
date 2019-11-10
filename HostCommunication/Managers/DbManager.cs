@@ -65,23 +65,18 @@ namespace HostCommunication.Managers
         {
             // fetch all data from each table from master database
             string[] tables = fetchAllTableNames();
-            List<DependentQuery> dpQueries = new List<DependentQuery>();
-            // use initialized _listOfDbDescriptions to clear databasees
-            foreach (var server in _listOfServers)
+            foreach (var dbDesc in _listOfDbDescriptions)
             {
-                foreach (var table in tables)
+                foreach(var table in tables)
                 {
-
-                    string sqlDeleteDataFromTable = string.Format("DELETE FROM {0}.dbo.{1}", server, table); // should be called db.dbo.tableName
-                    using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(server))
+                    string sqlDeleteDataFromTable = string.Format("DELETE FROM {0}.dbo.{1}", dbDesc.Name, table);
+                    using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(dbDesc.Server))
                     {
                         conn.Open();
                         var command = new SqlCommand(sqlDeleteDataFromTable, conn);
                         command.ExecuteNonQuery();
                         conn.Close();
                     }
-
-
                 }
             }
         }
