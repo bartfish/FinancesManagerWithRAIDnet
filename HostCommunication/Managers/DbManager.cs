@@ -7,11 +7,14 @@ using System.IO;
 using System.Text.RegularExpressions;
 using HostCommunication.HostModels;
 using System.Data;
+using FMDataModel.DataModels;
 
 namespace HostCommunication.Managers
 {
     public static class DbManager
     {
+
+        private static fmDbDataModel _context = new fmDbDataModel();
         private static List<string> _listOfDbs = new List<string>();
         private static List<string> _listOfServers = new List<string>();
         private static List<DbDescription> _listOfDbDescriptions = new List<DbDescription>();
@@ -27,7 +30,7 @@ namespace HostCommunication.Managers
             _listOfServers.Add(ConfigurationManager.AppSettings["DbServer_Two"]);         
         }
 
-        public static void PrepareRAID()
+        public static string PrepareRAID()
         {
             _listOfDbDescriptions = CheckDatabasesExistence(); // initializing the list of databases
 
@@ -59,6 +62,10 @@ namespace HostCommunication.Managers
                 spreadData();
             }
 
+            // set d0 db as the main database
+            var x = DataOperationManager.UpdateConnString(_context, _listOfDbDescriptions[0]);
+            var check = ConfigurationManager.ConnectionStrings[0];
+            return x;
         }
 
         private static void deleteData()

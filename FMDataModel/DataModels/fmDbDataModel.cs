@@ -4,12 +4,25 @@ namespace FMDataModel.DataModels
     using System.Data.Entity;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
+    using System.Web;
 
     public partial class fmDbDataModel : DbContext
     {
-        public fmDbDataModel()
-            : base("name=fmDbDataModel")
+        public static string conn = "data source=BARTRYB;initial catalog=fmWebApp;user id=sa;password=br123;MultipleActiveResultSets=True;App=EntityFramework";
+        public fmDbDataModel(string connectionString = "")
+            : base(((Func<string>)(
+                  delegate ()
+                    {
+                        if (HttpContext.Current.Session["dbConnectionString"] != null)
+                        {
+                            conn = HttpContext.Current.Session["dbConnectionString"].ToString();
+                        }
+                        return conn;
+                    }
+                    ))()
+            )
         {
+
         }
 
         public virtual DbSet<fm_Incomes> fm_Incomes { get; set; }
