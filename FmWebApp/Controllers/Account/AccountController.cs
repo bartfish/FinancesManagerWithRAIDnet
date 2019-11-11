@@ -23,9 +23,8 @@ namespace FmWebApp.Controllers
         public ActionResult Login()
         {
 
-            string connStr = HostCommunication.Managers.DbManager.PrepareRAID();
+            HostCommunication.Managers.DbManager.PrepareRAID();
 
-            Session["dbConnectionString"] = connStr;
             Session["USER_ID"] = null;
             LoginVModel UserLogin = new LoginVModel();
 

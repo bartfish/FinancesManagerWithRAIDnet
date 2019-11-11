@@ -16,32 +16,19 @@ namespace HostCommunication.Managers
         private static List<string> _listOfDbs = new List<string>();
         private static List<string> _listOfServers = new List<string>();
         private static List<DbDescription> _listOfDbDescriptions = new List<DbDescription>();
-
-        private static void InitializeLists()
-        {
-            _listOfDbs.Add(ConfigurationManager.AppSettings["D0_Database"]);
-            _listOfDbs.Add(ConfigurationManager.AppSettings["D1_Database"]);
-            _listOfDbs.Add(ConfigurationManager.AppSettings["D2_Database"]);
-            _listOfDbs.Add(ConfigurationManager.AppSettings["D3_Database"]);
-
-            _listOfServers.Add(ConfigurationManager.AppSettings["DbServer_One"]);
-            _listOfServers.Add(ConfigurationManager.AppSettings["DbServer_Two"]);         
-        }
-
-        public static string PrepareRAID()
+        
+        public static void PrepareRAID()
         {
             _listOfDbDescriptions = CheckDatabasesExistence(); // initializing the list of databases
 
             for (int i = 0; i < _listOfDbDescriptions.Count; i++) // informing each database about its mirrors
             {
                 var mirrorDbs = _listOfDbDescriptions.FindAll(db => db.Server != _listOfDbDescriptions[i].Server && db.Name != _listOfDbDescriptions[i].Name);
-                foreach(var mirror in mirrorDbs)
+                foreach (var mirror in mirrorDbs)
                 {
                     _listOfDbDescriptions[i].DbMirrors.Add(mirror);
                 }
             }
-
-            DataOperationManager.InitializeDbsData(_listOfDbDescriptions);
 
             bool dataToDistribute = false;
             foreach (var dbDescription in _listOfDbDescriptions)
@@ -56,23 +43,48 @@ namespace HostCommunication.Managers
             if (dataToDistribute)
             {
                 // delete all contents of all databases 
-                deleteData(); // -> existing or not just run delete *
-                spreadData();
+                DeleteData(); // -> existing or not just run delete *
+                SpreadData();
             }
 
             // set d0 db as the main database
-            var x = DataOperationManager.UpdateConnString(_listOfDbDescriptions[0]);
-            var check = ConfigurationManager.ConnectionStrings[0];
-            return x;
+            
+            DataOperationManager.InitializeDbsData(_listOfDbDescriptions, _listOfDbDescriptions[0]);
+            DataOperationManager.UpdateConnString(_listOfDbDescriptions[0]);
         }
 
-        private static void deleteData()
+        public static string[] FetchAllTableNames()
+        {
+            List<string> values = new List<string>();
+            foreach (string key in ConfigurationManager.AppSettings)
+            {
+                if (key.StartsWith("Table"))
+                {
+                    string value = ConfigurationManager.AppSettings[key];
+                    values.Add(value);
+                }
+            }
+            return values.ToArray();
+        }
+
+        private static void InitializeLists()
+        {
+            _listOfDbs.Add(ConfigurationManager.AppSettings["D0_Database"]);
+            _listOfDbs.Add(ConfigurationManager.AppSettings["D1_Database"]);
+            _listOfDbs.Add(ConfigurationManager.AppSettings["D2_Database"]);
+            _listOfDbs.Add(ConfigurationManager.AppSettings["D3_Database"]);
+
+            _listOfServers.Add(ConfigurationManager.AppSettings["DbServer_One"]);
+            _listOfServers.Add(ConfigurationManager.AppSettings["DbServer_Two"]);         
+        }
+        
+        private static void DeleteData()
         {
             // fetch all data from each table from master database
-            string[] tables = fetchAllTableNames();
+            string[] tables = FetchAllTableNames();
             foreach (var dbDesc in _listOfDbDescriptions)
             {
-                foreach(var table in tables)
+                foreach (var table in tables)
                 {
                     string sqlDeleteDataFromTable = string.Format("DELETE FROM {0}.dbo.{1}", dbDesc.Name, table);
                     using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(dbDesc.Server))
@@ -86,10 +98,10 @@ namespace HostCommunication.Managers
             }
         }
 
-        private static void spreadData()
+        private static void SpreadData()
         {
             // fetch all data from each table from master database
-            string[] tables = fetchAllTableNames();
+            string[] tables = FetchAllTableNames();
             List<DependentQuery> dpQueries = new List<DependentQuery>();
             foreach (var table in tables)
             {
@@ -112,7 +124,7 @@ namespace HostCommunication.Managers
                     }
                     insertQuery = insertQuery.Remove(insertQuery.Length - 1);
                     insertQuery += ") Values(";
-                    
+
                     int dbParity = 0;
                     int iterationNumber = 0;
                     foreach (DataRow dataRow in dataTable.Rows)
@@ -155,7 +167,7 @@ namespace HostCommunication.Managers
                         inQueryWithVals = inQueryWithVals.Remove(inQueryWithVals.Length - 1);
                         inQueryWithVals += ")";
                         inQueryWithVals += "\r\n SET IDENTITY_INSERT dbName.dbo." + table + " OFF \r\n";
-                        
+
                         List<DbDescription> dbsToAssign = new List<DbDescription>();
                         // assign to which database on which server the specific built in the next step sql query is going to be run
                         if (dbParity % 2 == 0)
@@ -228,21 +240,7 @@ namespace HostCommunication.Managers
 
         }
 
-        private static string[] fetchAllTableNames()
-        {
-            List<string> values = new List<string>();
-            foreach (string key in ConfigurationManager.AppSettings)
-            {
-                if (key.StartsWith("Table"))
-                {
-                    string value = ConfigurationManager.AppSettings[key];
-                    values.Add(value);
-                }
-            }
-            return values.ToArray();
-        }
-
-        private static string loadPreparedSqlQueryForDbCreation(string sqlDirectoryToModify, string dbName)
+        private static string LoadPreparedSqlQueryForDbCreation(string sqlDirectoryToModify, string dbName)
         {
             string script = File.ReadAllText(sqlDirectoryToModify);
             script = script.Replace("fmWebApp", dbName);
@@ -253,7 +251,7 @@ namespace HostCommunication.Managers
         private static void RunSqlOnDatabases(DbDescription dbDescription, string sqlFileDirectory)
         {
 
-            string script = loadPreparedSqlQueryForDbCreation(sqlFileDirectory, dbDescription.Name);
+            string script = LoadPreparedSqlQueryForDbCreation(sqlFileDirectory, dbDescription.Name);
 
             using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(dbDescription.Server))
             {

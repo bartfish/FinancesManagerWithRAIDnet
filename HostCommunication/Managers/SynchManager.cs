@@ -1,4 +1,5 @@
 ﻿using FMDataModel.DataModels;
+using HostCommunication.HostModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,18 +8,21 @@ namespace HostCommunication.Managers
 {
     public static class SynchManager
     {
-        private static List<string> dbTables = new List<string>()
+        private static string[] _dbTables { get; set; }
+
+        public static void UpdateMirrorDb(DbDescription dbDescription)
         {
-            "fm_Users", "fm_Incomes", "fm_Outcomes"
-        };
+
+        }
 
         public static void FetchAllFromMasterDb()
         {
+            _dbTables = DbManager.FetchAllTableNames();
             using (var model = new fmDbDataModel())
             {
-                foreach (var table in dbTables)
+                foreach (var table in _dbTables)
                 {
-                    //var tableFromModel = Set(GetType(table);
+                    
                 }
             }
         }

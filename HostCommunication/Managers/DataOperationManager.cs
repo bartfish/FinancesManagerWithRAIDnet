@@ -13,9 +13,10 @@ namespace HostCommunication.Managers
 {
     public static class DataOperationManager
     {
+        private static int nullCounter = 0;
         private static int errorCounter = 0; // if the value is the same as the number of databases return null to the user and to not allow for the operation to continue
         private static int numOfUpdatedDatabases = 0;
-        private static DbDescription currentlyConnectedDb;
+        private static DbDescription _currentlyConnectedDb;
         private static List<DbDescription> _currentListOfDbs = new List<DbDescription>();
 
         /// <summary>
@@ -30,16 +31,27 @@ namespace HostCommunication.Managers
             if (methodReturnStatus == MethodReturnStatus.Value)
             {
                 // if everything went well 
-                    // return to the method and continue its execution
+                // return to the method and continue its execution
+                return calledMethod.DynamicInvoke(paramsSent);
 
             }
             else if (methodReturnStatus == MethodReturnStatus.Null)
             {
                 // if error occured
                 // switch webconfig to the mirror db from other server
-                SwitchToOtherPart();
-                // call the method once again
-                return calledMethod.DynamicInvoke(paramsSent);
+                if (nullCounter < _currentListOfDbs.Count / 2)
+                {
+                    // increment counter
+                    nullCounter++;
+
+                    // switch databases
+                    SwitchToOtherPart();
+ 
+                    // call the method once again
+                    return calledMethod.DynamicInvoke(paramsSent);
+                }
+                nullCounter = 0;
+                return null;
             }
             else if (methodReturnStatus == MethodReturnStatus.Error)
             {
@@ -50,24 +62,45 @@ namespace HostCommunication.Managers
                 // run the method once again
                 return calledMethod.DynamicInvoke(paramsSent);
             }
-            return calledMethod.DynamicInvoke(paramsSent);
+            else
+            {
+                return calledMethod.DynamicInvoke(paramsSent);
+            }
         }
 
-        public static void InitializeDbsData(List<DbDescription> dbs)
+        public static void InitializeDbsData(List<DbDescription> dbs, DbDescription currDb)
         {
             _currentListOfDbs = dbs;
+            _currentlyConnectedDb = currDb;
         }
 
         public static void SwitchToMirror()
         {
             // go to next mirror on the other server and return it
-            
+            foreach(var mirror in _currentListOfDbs)
+            {
+                if (mirror.Name != _currentlyConnectedDb.Name && mirror.MirrorSide == _currentlyConnectedDb.MirrorSide)
+                {
+                    _currentlyConnectedDb = mirror;
+                    break;
+                }
+            }
+            UpdateConnString(_currentlyConnectedDb);
         }
 
         public static void SwitchToOtherPart()
         {
             // go to other part of the databases on the same server
-
+            // go to next mirror on the other server and return it
+            foreach (var mirror in _currentListOfDbs)
+            {
+                if (mirror.Name != _currentlyConnectedDb.Name && mirror.MirrorSide != _currentlyConnectedDb.MirrorSide)
+                {
+                    _currentlyConnectedDb = mirror;
+                    break;
+                }
+            }
+            UpdateConnString(_currentlyConnectedDb);
         }
 
         public static string UpdateConnString(DbDescription newDbDescription)

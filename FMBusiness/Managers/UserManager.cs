@@ -7,6 +7,8 @@ using FMDataModel.Enums;
 using FMDataModel.DataModels;
 using log4net;
 using System.Reflection;
+using HostCommunication.Managers;
+using HostCommunication.HostModels;
 
 namespace FMBusiness.Managers
 {
@@ -108,6 +110,7 @@ namespace FMBusiness.Managers
                 }
                 catch (Exception e)
                 {
+                    DataOperationManager.VerifyResult(new Func<RegisterVModel, bool>(InsertUser),  new object[] { userRegister }, MethodReturnStatus.Error);
                     _log.ErrorFormat("There was an error with inserting user to db. Message: {0}, Stacktrace: {1}", e.Message, e.StackTrace);
                     return false;
                 }
