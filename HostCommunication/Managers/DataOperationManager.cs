@@ -5,9 +5,9 @@ using System.Configuration;
 using System.Data.Entity;
 using System.Data.Entity.Core.EntityClient;
 using System.Data.SqlClient;
-using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Web;
 
 namespace HostCommunication.Managers
 {
@@ -73,41 +73,7 @@ namespace HostCommunication.Managers
         public static string UpdateConnString(DbDescription newDbDescription)
         {
             string initialStr = $"data source={newDbDescription.Server};initial catalog={newDbDescription.Name};user id=sa;password=br123;MultipleActiveResultSets=True;App=EntityFramework";
-            //Current.Session["dbConnection"] = initialStr;
-            ////Fetch Connection String from Web.config 
-            //// ConnectionStrings[0] == Fetch Connection String Format
-            //var DBCS = ConfigurationManager.ConnectionStrings[0];
-
-            ////Convert Readonly to Writable (In Connection String Provider is readonly so we need to change it as Writable)  
-            ////Dont forgot to Declare BelowNameSpace  
-            ////using System.Configuration;  
-            ////using System.Reflection;  
-            //var writable = typeof(ConfigurationElement).GetField("_bReadOnly", BindingFlags.Instance | BindingFlags.NonPublic);
-            //writable.SetValue(DBCS, false);
-
-            ////Replace Connecion string  
-            //DBCS.ConnectionString = initialStr;
-
-            // add a reference to System.Configuration
-            //var entityCnxStringBuilder = new EntityConnectionStringBuilder
-            //    (System.Configuration.ConfigurationManager
-            //        .ConnectionStrings["fmDbDataModel"].ConnectionString);
-
-            //// init the sqlbuilder with the full EF connectionstring cargo
-            //var sqlCnxStringBuilder = new SqlConnectionStringBuilder
-            //    (entityCnxStringBuilder.ProviderConnectionString);
-
-            //// now flip the properties that were changed
-            //context.Database.Connection.ConnectionString
-            //    = initialStr;
-            //Uri UriAssemblyFolder = new Uri(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetName().CodeBase));
-            //string appPath = UriAssemblyFolder.LocalPath;
-            //ExeConfigurationFileMap map = new ExeConfigurationFileMap { ExeConfigFilename = "FMDataModel" };
-            //Configuration config = ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
-            //var connectionStringsSection = (ConnectionStringsSection)config.GetSection("connectionStrings");
-            //connectionStringsSection.ConnectionStrings["fmDbDataModel"].ConnectionString = initialStr;
-            //config.Save();
-            //ConfigurationManager.RefreshSection("connectionStrings");
+            HttpContext.Current.Session["dbConnectionString"] = initialStr;
             return initialStr;
         }
         

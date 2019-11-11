@@ -13,8 +13,6 @@ namespace HostCommunication.Managers
 {
     public static class DbManager
     {
-
-        private static fmDbDataModel _context = new fmDbDataModel();
         private static List<string> _listOfDbs = new List<string>();
         private static List<string> _listOfServers = new List<string>();
         private static List<DbDescription> _listOfDbDescriptions = new List<DbDescription>();
@@ -63,7 +61,7 @@ namespace HostCommunication.Managers
             }
 
             // set d0 db as the main database
-            var x = DataOperationManager.UpdateConnString(_context, _listOfDbDescriptions[0]);
+            var x = DataOperationManager.UpdateConnString(_listOfDbDescriptions[0]);
             var check = ConfigurationManager.ConnectionStrings[0];
             return x;
         }
