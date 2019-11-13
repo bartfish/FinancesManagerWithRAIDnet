@@ -14,7 +14,7 @@ namespace HostCommunication.Managers
     public static class DataOperationManager
     {
         private static int nullCounter = 0;
-        private static int errorCounter = 0; // if the value is the same as the number of databases return null to the user and to not allow for the operation to continue
+        private static int errorCounter = 1; // if the value is the same as the number of databases return null to the user and to not allow for the operation to continue
         private static int numOfUpdatedDatabases = 0;
         private static DbDescription _currentlyConnectedDb;
         private static List<DbDescription> _currentListOfDbs = new List<DbDescription>();
@@ -27,7 +27,7 @@ namespace HostCommunication.Managers
         /// <param name="methodReturnStatus"></param>
         public static object VerifyResult(Delegate calledMethod, object[] paramsSent, MethodReturnStatus methodReturnStatus)
         {
-            string currentDbConnection = ConfigurationManager.ConnectionStrings["fmDbDataModel"].ConnectionString;
+            //string currentDbConnection = ConfigurationManager.ConnectionStrings["fmDbDataModel"].ConnectionString;
             if (methodReturnStatus == MethodReturnStatus.Value)
             {
                 // if everything went well 
@@ -55,12 +55,22 @@ namespace HostCommunication.Managers
             }
             else if (methodReturnStatus == MethodReturnStatus.Error)
             {
-                // if error occured
-                SwitchToMirror();
-                // switch webconfig to the mirror db from other server
+                errorCounter++;
+                if (errorCounter < _currentListOfDbs.Count / 2)
+                {
+                    // increment counter
+                    
+
+                    // switch databases
+                    SwitchToMirror();
+
+                    // call the method once again
+                    return calledMethod.DynamicInvoke(paramsSent);
+                }
+                errorCounter = 0;
 
                 // run the method once again
-                return calledMethod.DynamicInvoke(paramsSent);
+                return null; // return some exception
             }
             else
             {
@@ -92,11 +102,11 @@ namespace HostCommunication.Managers
         {
             // go to other part of the databases on the same server
             // go to next mirror on the other server and return it
-            foreach (var mirror in _currentListOfDbs)
+            foreach (var otherPart in _currentListOfDbs)
             {
-                if (mirror.Name != _currentlyConnectedDb.Name && mirror.MirrorSide != _currentlyConnectedDb.MirrorSide)
+                if (otherPart.Name != _currentlyConnectedDb.Name && otherPart.MirrorSide != _currentlyConnectedDb.MirrorSide)
                 {
-                    _currentlyConnectedDb = mirror;
+                    _currentlyConnectedDb = otherPart;
                     break;
                 }
             }
