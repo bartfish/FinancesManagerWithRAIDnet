@@ -2,6 +2,7 @@
 using HostCommunication.HostModels;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Text;
 
 namespace HostCommunication.Managers
@@ -30,6 +31,13 @@ namespace HostCommunication.Managers
         public static void FetchNewestFromMasterDb()
         {
 
+        }
+
+        public static void CreateDbMirror(DbDescription dbToBeCreated, DbDescription workingMirror)
+        {
+            DbManager.RunSqlAgainstDatabase(dbToBeCreated, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
+            List<DependentQuery> listOfQueries = DbManager.BuildInsertsFrom(workingMirror, dbToBeCreated);
+            DbManager.RunDQueriesAcrossDb(listOfQueries);
         }
     }
 }

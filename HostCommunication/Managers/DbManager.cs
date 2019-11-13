@@ -52,7 +52,10 @@ namespace HostCommunication.Managers
             {
                 foreach (var dbDescription in _listOfDbDescriptions)
                 {
-                    RunSqlOnDatabases(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
+                    if (dbDescription.ShouldBeRecreated == RecreationType.FromScratch)
+                    {
+                        RunSqlAgainstDatabase(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
+                    }
                 }
                 DeleteData();
                 SpreadData();
@@ -65,12 +68,11 @@ namespace HostCommunication.Managers
                     {
                         // get mirror data
                         var workingMirror = dbDescription.DbMirrors.Find(db => db.ShouldBeRecreated == RecreationType.None); // it means the mirror exists and data should be taken from there
-
-                        // fetch data from mirror
-
-                        // insert data to current one
+                        
+                        SynchManager.CreateDbMirror(dbDescription, workingMirror);
 
                         // update recreation status to none
+                        dbDescription.ShouldBeRecreated = RecreationType.None;
                     }
                 }
             }
@@ -79,7 +81,7 @@ namespace HostCommunication.Managers
             //{
             //    if (!dbDescription.Exists)
             //    {
-            //        RunSqlOnDatabases(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
+            //        RunSqlAgainstDatabase(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
             //        dataToDistribute = true;
             //    }
             //}
@@ -145,6 +147,7 @@ namespace HostCommunication.Managers
             }
         }
 
+        // To be refactored
         private static void SpreadData()
         {
             // fetch all data from each table from master database
@@ -281,10 +284,119 @@ namespace HostCommunication.Managers
 
                 }
             }
-            // run all from the first server
 
-            // run all from the second server 
+        }
 
+        public static List<DependentQuery> BuildInsertsFrom(DbDescription sourceDb, DbDescription destinationDb)
+        {
+            string[] tables = FetchAllTableNames();
+            List<DependentQuery> dpQueries = new List<DependentQuery>();
+            foreach (var table in tables)
+            {
+                string sqlGetAllDataFromTable = string.Format("SELECT * FROM {0}.dbo.{1}", sourceDb.Name, table);
+                using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(sourceDb.Server))
+                {
+                    SqlCommand cmd = new SqlCommand(sqlGetAllDataFromTable, conn);
+                    conn.Open();
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dataTable = new DataTable();
+                    da.Fill(dataTable);
+
+                    string insertQuery = "SET IDENTITY_INSERT dbName.dbo." + table + " ON \r\n";
+                    insertQuery += "INSERT INTO dbName.dbo." + table + "(";
+                    foreach (var column in dataTable.Columns)
+                    {
+                        insertQuery += column + ",";
+                    }
+                    insertQuery = insertQuery.Remove(insertQuery.Length - 1);
+                    insertQuery += ") Values(";
+
+                    int iterationNumber = 0;
+                    foreach (DataRow dataRow in dataTable.Rows)
+                    {
+                        List<SqlParameter> byteParams = new List<SqlParameter>();
+                        string inQueryWithVals = insertQuery;
+                        foreach (DataColumn column in dataTable.Columns)
+                        {
+                            var data = dataRow[column.ToString()];
+                            if (data.ToString() == string.Empty)
+                            {
+                                inQueryWithVals += "null,";
+                            }
+                            else
+                            {
+                                if
+                                (column.DataType == typeof(string) || column.DataType == typeof(DateTime))
+                                {
+                                    inQueryWithVals += "'" + dataRow[column.ToString()].ToString() + "',";
+                                }
+                                else if (column.DataType == typeof(Byte[]))
+                                {
+                                    string sqlParamName = "@byteArrs" + iterationNumber++;
+                                    byte[] xy = (byte[])dataRow[column.ToString()];
+                                    inQueryWithVals += sqlParamName + ",";
+
+                                    byteParams.Add(new SqlParameter(sqlParamName, SqlDbType.VarBinary)
+                                    {
+                                        Direction = ParameterDirection.Input,
+                                        Size = 16,
+                                        Value = xy
+                                    });
+                                }
+                                else
+                                {
+                                    inQueryWithVals += dataRow[column.ToString()] + ",";
+                                }
+                            }
+                        }
+                        inQueryWithVals = inQueryWithVals.Remove(inQueryWithVals.Length - 1);
+                        inQueryWithVals += ")";
+                        inQueryWithVals += "\r\n SET IDENTITY_INSERT dbName.dbo." + table + " OFF \r\n";
+
+                        DependentQuery dpQuery = new DependentQuery
+                        {
+                            DatabaseDescription = destinationDb,
+                            Query = inQueryWithVals,
+                            DbSqlParams = byteParams
+                        };
+                        dpQuery = dpQuery.UpdateQueryParams();
+                        dpQueries.Add(dpQuery);
+                    }
+
+                    conn.Close();
+                    da.Dispose();
+                }
+            }
+            return dpQueries;
+        }
+
+        public static void RunDQueriesAcrossDb(List<DependentQuery> dependentQueries)
+        {
+            // run sql queries on each database
+            foreach (var currQuery in dependentQueries)
+            {
+                using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(currQuery.DatabaseDescription.Server))
+                {
+                    try
+                    {
+                        conn.Open();
+                        using (var command = new SqlCommand(currQuery.Query, conn))
+                        {
+                            command.Parameters.AddRange(currQuery.DbSqlParams.ToArray());
+                            command.ExecuteNonQuery();
+                            command.Parameters.Clear();
+                        }
+                        conn.Close();
+
+                    }
+                    catch (Exception)
+                    {
+
+                        throw;
+                    }
+
+                }
+            }
         }
 
         private static string LoadPreparedSqlQueryForDbCreation(string sqlDirectoryToModify, string dbName)
@@ -295,7 +407,7 @@ namespace HostCommunication.Managers
             return script;
         }
 
-        private static void RunSqlOnDatabases(DbDescription dbDescription, string sqlFileDirectory)
+        public static void RunSqlAgainstDatabase(DbDescription dbDescription, string sqlFileDirectory)
         {
 
             string script = LoadPreparedSqlQueryForDbCreation(sqlFileDirectory, dbDescription.Name);
@@ -365,6 +477,8 @@ namespace HostCommunication.Managers
 
                                 if (foundRow != null)
                                     int.TryParse(foundRow.ToString(), out dbId);
+                                else
+                                    dbId = 0;
 
                                 dbExists = dbId != 0;
 
