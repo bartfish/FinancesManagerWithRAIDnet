@@ -20,6 +20,12 @@ namespace HostCommunication.HostModels
 
         public MirrorSide MirrorSide { get; set; }
 
+        public RecreationType ShouldBeRecreated { get; set; }
+        
+        public int NumberOfRecords { get; set; }
+
+        public DateTime TimeOfLastDbModification { get; set; }
+
         public List<DbDescription> DbMirrors { get; set; } = new List<DbDescription>();
 
     }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Data.SqlClient;
 using System.Configuration;
@@ -8,6 +7,7 @@ using System.Text.RegularExpressions;
 using HostCommunication.HostModels;
 using System.Data;
 using FMDataModel.DataModels;
+using System.Collections.Generic;
 
 namespace HostCommunication.Managers
 {
@@ -15,37 +15,81 @@ namespace HostCommunication.Managers
     {
         private static List<string> _listOfDbs = new List<string>();
         private static List<string> _listOfServers = new List<string>();
-        private static List<DbDescription> _listOfDbDescriptions = new List<DbDescription>();
+        private static List<DbDescription> _listOfDbDescriptions { get; set; }
         
         public static void PrepareRAID()
         {
+            //if (_listOfDbDescriptions != null)
+            //    _listOfDbDescriptions.RemoveAll(db => db.Name != string.Empty);
+
             _listOfDbDescriptions = CheckDatabasesExistence(); // initializing the list of databases
 
             for (int i = 0; i < _listOfDbDescriptions.Count; i++) // informing each database about its mirrors
             {
-                var mirrorDbs = _listOfDbDescriptions.FindAll(db => db.Server != _listOfDbDescriptions[i].Server && db.Name != _listOfDbDescriptions[i].Name);
+                var mirrorDbs = _listOfDbDescriptions.FindAll(db => ((db.Server != _listOfDbDescriptions[i].Server) && (db.MirrorSide == _listOfDbDescriptions[i].MirrorSide)));
                 foreach (var mirror in mirrorDbs)
-                {
                     _listOfDbDescriptions[i].DbMirrors.Add(mirror);
-                }
             }
-
-            bool dataToDistribute = false;
+            
             foreach (var dbDescription in _listOfDbDescriptions)
             {
-                if (!dbDescription.Exists)
+                foreach (var dbMirror in dbDescription.DbMirrors)
                 {
-                    RunSqlOnDatabases(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
-                    dataToDistribute = true;
+                    if (!dbMirror.Exists && !dbDescription.Exists)
+                    {
+                        dbDescription.ShouldBeRecreated = dbMirror.ShouldBeRecreated = RecreationType.FromScratch;
+                    }
+                    else if (!dbMirror.Exists && dbDescription.Exists)
+                    {
+                        dbMirror.ShouldBeRecreated = RecreationType.ByMirroring;
+                        dbDescription.ShouldBeRecreated = RecreationType.None;
+                    }
                 }
             }
 
-            if (dataToDistribute)
+
+            if (_listOfDbDescriptions.Find(db => db.ShouldBeRecreated == RecreationType.FromScratch) != null)
             {
-                // delete all contents of all databases 
-                DeleteData(); // -> existing or not just run delete *
+                foreach (var dbDescription in _listOfDbDescriptions)
+                {
+                    RunSqlOnDatabases(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
+                }
+                DeleteData();
                 SpreadData();
             }
+            else
+            {
+                foreach (var dbDescription in _listOfDbDescriptions)
+                {
+                    if (dbDescription.ShouldBeRecreated == RecreationType.ByMirroring)
+                    {
+                        // get mirror data
+                        var workingMirror = dbDescription.DbMirrors.Find(db => db.ShouldBeRecreated == RecreationType.None); // it means the mirror exists and data should be taken from there
+
+                        // fetch data from mirror
+
+                        // insert data to current one
+
+                        // update recreation status to none
+                    }
+                }
+            }
+
+            //foreach (var dbDescription in _listOfDbDescriptions)
+            //{
+            //    if (!dbDescription.Exists)
+            //    {
+            //        RunSqlOnDatabases(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
+            //        dataToDistribute = true;
+            //    }
+            //}
+
+            //if (dataToDistribute)
+            //{
+            //    // delete all contents of all databases 
+            //    DeleteData(); // -> existing or not just run delete *
+            //    SpreadData();
+            //}
 
             // set d0 db as the main database
             
@@ -69,6 +113,9 @@ namespace HostCommunication.Managers
 
         private static void InitializeLists()
         {
+            _listOfDbs = new List<string>();
+            _listOfServers = new List<string>();
+
             _listOfDbs.Add(ConfigurationManager.AppSettings["D0_Database"]);
             _listOfDbs.Add(ConfigurationManager.AppSettings["D1_Database"]);
             _listOfDbs.Add(ConfigurationManager.AppSettings["D2_Database"]);
@@ -327,6 +374,7 @@ namespace HostCommunication.Managers
                                     Server = currentServer,
                                     Exists = dbExists,
                                     IsCurrentlyConnected = dbExists,
+                                    ShouldBeRecreated = RecreationType.None,
                                     MirrorSide = (i % 2 == 0) ? MirrorSide.Left : MirrorSide.Right
                                 });
                             }
