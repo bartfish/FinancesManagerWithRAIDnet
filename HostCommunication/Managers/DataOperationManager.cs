@@ -18,6 +18,7 @@ namespace HostCommunication.Managers
         private static int numOfUpdatedDatabases = 0;
         private static DbDescription _currentlyConnectedDb;
         private static List<DbDescription> _currentListOfDbs = new List<DbDescription>();
+        private static int wasMirrorUpdated = 0;
 
         /// <summary>
         /// Method responsible for veryfying the results assigned by the programmer
@@ -55,22 +56,20 @@ namespace HostCommunication.Managers
             }
             else if (methodReturnStatus == MethodReturnStatus.Error)
             {
-                errorCounter++;
-                if (errorCounter < _currentListOfDbs.Count / 2)
+                if (errorCounter <= _currentListOfDbs.Count / 2)
                 {
-                    // increment counter
+                    errorCounter++;
                     
-
-                    // switch databases
                     SwitchToMirror();
-
-                    // call the method once again
+                  
                     return calledMethod.DynamicInvoke(paramsSent);
+                } 
+                else
+                {
+                    errorCounter = 0;
+                    return null; 
                 }
-                errorCounter = 0;
 
-                // run the method once again
-                return null; // return some exception
             }
             else
             {
@@ -119,6 +118,20 @@ namespace HostCommunication.Managers
             HttpContext.Current.Session["dbConnectionString"] = initialStr;
             return initialStr;
         }
-        
+
+        public static void Synch(Delegate calledMethod, object[] paramsSent)
+        {
+            if (wasMirrorUpdated != _currentlyConnectedDb.DbMirrors.Count)
+            {
+                wasMirrorUpdated++;
+                DataOperationManager.SwitchToMirror();
+                calledMethod.DynamicInvoke(paramsSent);
+            } else
+            {
+                wasMirrorUpdated = 0;
+                return;
+            }
+        }
+
     }
 }

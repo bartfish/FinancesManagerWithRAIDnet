@@ -19,9 +19,6 @@ namespace HostCommunication.Managers
         
         public static void PrepareRAID()
         {
-            //if (_listOfDbDescriptions != null)
-            //    _listOfDbDescriptions.RemoveAll(db => db.Name != string.Empty);
-
             _listOfDbDescriptions = CheckDatabasesExistence(); // initializing the list of databases
 
             for (int i = 0; i < _listOfDbDescriptions.Count; i++) // informing each database about its mirrors

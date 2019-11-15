@@ -49,8 +49,7 @@ namespace FMBusiness.Managers
             }
             catch (Exception e)
             {
-                userExists = (fm_Users)DataOperationManager.VerifyResult(new Func<LoginVModel, LoginVModel>(UserSignIn), new object[] { UserLogin }, HostCommunication.HostModels.MethodReturnStatus.Error);
-                return null;
+                return (LoginVModel)DataOperationManager.VerifyResult(new Func<LoginVModel, LoginVModel>(UserSignIn), new object[] { UserLogin }, HostCommunication.HostModels.MethodReturnStatus.Error);
             }
             
         }

@@ -105,6 +105,7 @@ namespace FMBusiness.Managers
 
                     model.fm_Users.Add(newUser);
                     model.SaveChanges();
+                    DataOperationManager.Synch(new Func<RegisterVModel, bool>(InsertUser), new object[] { userRegister });
 
                     return true;
                 }
@@ -123,13 +124,28 @@ namespace FMBusiness.Managers
 
             using (var model = new fmDbDataModel())
             {
-                var user = model.fm_Users.FirstOrDefault(u => u.Id == UserSingleton.Instance.Id);
-                if (user != null)
+                try
                 {
-                    UserSingleton.Instance.DefaultCurrency = (int)currency;
-                    user.DefaultCurrency = (int)currency;
-                    model.SaveChanges();
+                    var user = model.fm_Users.FirstOrDefault(u => u.Id == UserSingleton.Instance.Id);
+                    if (user != null)
+                    {
+                        UserSingleton.Instance.DefaultCurrency = (int)currency;
+                        user.DefaultCurrency = (int)currency;
+                        model.SaveChanges();
+                        DataOperationManager.Synch(new Action<CurrencyType?, void>(SwitchCurrency), new object[] { currency });
+                    }
+                    else
+                    {
+                        DataOperationManager.VerifyResult(new Func<CurrencyType?, void>(SwitchCurrency), new object[] { currency }, MethodReturnStatus.Error);
+                    }
+                    
                 }
+                catch (Exception)
+                {
+                    DataOperationManager.VerifyResult(new Func<CurrencyType?, object>(SwitchCurrency), new object[] { currency }, MethodReturnStatus.Error);
+                    _log.ErrorFormat("There was an error with inserting user to db. Message: {0}, Stacktrace: {1}", e.Message, e.StackTrace);
+                }
+
             }
         }
     }

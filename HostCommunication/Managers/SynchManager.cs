@@ -3,7 +3,6 @@ using HostCommunication.HostModels;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Text;
 
 namespace HostCommunication.Managers
 {
@@ -13,7 +12,7 @@ namespace HostCommunication.Managers
 
         public static void UpdateMirrorDb(DbDescription dbDescription)
         {
-
+            
         }
 
         public static void FetchAllFromMasterDb()
