@@ -126,23 +126,27 @@ namespace FMBusiness.Managers
             {
                 try
                 {
-                    var user = model.fm_Users.FirstOrDefault(u => u.Id == UserSingleton.Instance.Id);
-                    if (user != null)
+                    if (HttpContext.Current.Session["USER_ID"] != null)
                     {
-                        UserSingleton.Instance.DefaultCurrency = (int)currency;
-                        user.DefaultCurrency = (int)currency;
-                        model.SaveChanges();
-                        DataOperationManager.Synch(new Action<CurrencyType?, void>(SwitchCurrency), new object[] { currency });
-                    }
-                    else
-                    {
-                        DataOperationManager.VerifyResult(new Func<CurrencyType?, void>(SwitchCurrency), new object[] { currency }, MethodReturnStatus.Error);
+                        long userId = Convert.ToInt64(HttpContext.Current.Session["USER_ID"].ToString());
+                        var user = model.fm_Users.FirstOrDefault(u => u.Id == userId);
+                        if (user != null)
+                        {
+                            UserSingleton.Instance.DefaultCurrency = (int)currency;
+                            user.DefaultCurrency = (int)currency;
+                            model.SaveChanges();
+                            DataOperationManager.Synch(new Action<CurrencyType?>(SwitchCurrency), new object[] { currency });
+                        }
+                        else
+                        {
+                            DataOperationManager.VerifyResult(new Action<CurrencyType?>(SwitchCurrency), new object[] { currency }, MethodReturnStatus.Null);
+                        }
                     }
                     
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    DataOperationManager.VerifyResult(new Func<CurrencyType?, object>(SwitchCurrency), new object[] { currency }, MethodReturnStatus.Error);
+                    DataOperationManager.VerifyResult(new Action<CurrencyType?>(SwitchCurrency), new object[] { currency }, MethodReturnStatus.Error);
                     _log.ErrorFormat("There was an error with inserting user to db. Message: {0}, Stacktrace: {1}", e.Message, e.StackTrace);
                 }
 
