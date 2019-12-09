@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HostCommunication.HostModels
 {
-    public enum RecreationType
+    public enum CreationType
     {
         ByMirroring,
         FromScratch,

@@ -14,17 +14,9 @@ namespace HostCommunication.HostModels
 
         public bool IsCurrentlyConnected { get; set; }
 
-        public int WorkingOrderWhenPaired { get; set; }
-
-        public bool IsFromCurrentMaster { get; set; }
-
         public MirrorSide MirrorSide { get; set; }
 
-        public RecreationType ShouldBeRecreated { get; set; }
-        
-        public int NumberOfRecords { get; set; }
-
-        public DateTime TimeOfLastDbModification { get; set; }
+        public CreationType ShouldBeRecreated { get; set; }
 
         public List<DbDescription> DbMirrors { get; set; } = new List<DbDescription>();
 

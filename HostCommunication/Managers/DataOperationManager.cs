@@ -15,7 +15,6 @@ namespace HostCommunication.Managers
     {
         private static int nullCounter = 0;
         private static int errorCounter = 1; // if the value is the same as the number of databases return null to the user and to not allow for the operation to continue
-        private static int numOfUpdatedDatabases = 0;
         private static DbDescription _currentlyConnectedDb;
         private static List<DbDescription> _currentListOfDbs = new List<DbDescription>();
         private static int wasMirrorUpdated = 0;
@@ -28,7 +27,6 @@ namespace HostCommunication.Managers
         /// <param name="methodReturnStatus"></param>
         public static object VerifyResult(Delegate calledMethod, object[] paramsSent, MethodReturnStatus methodReturnStatus)
         {
-            //string currentDbConnection = ConfigurationManager.ConnectionStrings["fmDbDataModel"].ConnectionString;
             if (methodReturnStatus == MethodReturnStatus.Value)
             {
                 // if everything went well 
@@ -114,7 +112,7 @@ namespace HostCommunication.Managers
 
         public static string UpdateConnString(DbDescription newDbDescription)
         {
-            string initialStr = $"data source={newDbDescription.Server};initial catalog={newDbDescription.Name};user id=sa;password=br123;MultipleActiveResultSets=True;App=EntityFramework";
+            string initialStr = $"data source={newDbDescription.Server};initial catalog={newDbDescription.Name};user id=" + ConfigurationManager.AppSettings["SqlServerLogin"] + "; password=" + ConfigurationManager.AppSettings["SqlServerPassword"] + "; MultipleActiveResultSets=True;App=EntityFramework";
             HttpContext.Current.Session["dbConnectionString"] = initialStr;
             return initialStr;
         }
@@ -124,7 +122,7 @@ namespace HostCommunication.Managers
             if (wasMirrorUpdated != _currentlyConnectedDb.DbMirrors.Count)
             {
                 wasMirrorUpdated++;
-                DataOperationManager.SwitchToMirror();
+                SwitchToMirror();
                 calledMethod.DynamicInvoke(paramsSent);
             } else
             {
