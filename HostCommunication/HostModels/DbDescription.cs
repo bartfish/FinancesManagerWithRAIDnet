@@ -20,5 +20,6 @@ namespace HostCommunication.HostModels
 
         public List<DbDescription> DbMirrors { get; set; } = new List<DbDescription>();
 
+        public string ServerDirectory { get; internal set; }
     }
 }

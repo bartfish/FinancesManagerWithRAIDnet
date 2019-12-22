@@ -10,7 +10,8 @@ namespace HostCommunication.HostModels
         public DbDescription DatabaseDescription { get; set; }
         public string Query { get; set; }
         public List<SqlParameter> DbSqlParams = new List<SqlParameter>();
-        
+        public string dbSaveDirectory;
+
         public DependentQuery UpdateQueryParams()
         {
             this.Query = this.Query.Replace("dbName", DatabaseDescription.Name);

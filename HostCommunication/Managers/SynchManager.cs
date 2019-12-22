@@ -12,7 +12,7 @@ namespace HostCommunication.Managers
 
         public static void CreateDbMirror(DbDescription dbToBeCreated, DbDescription workingMirror)
         {
-            DbManager.RunSqlAgainstDatabase(dbToBeCreated, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
+            DbManager.RunSqlAgainstDatabase(dbToBeCreated, ConfigurationManager.AppSettings["sqlCreateBackupDb"], dbToBeCreated.ServerDirectory);
             List<DependentQuery> listOfQueries = DbManager.BuildInsertsFrom(workingMirror, dbToBeCreated);
             DbManager.RunDQueriesAcrossDb(listOfQueries);
         }

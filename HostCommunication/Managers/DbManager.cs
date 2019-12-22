@@ -51,7 +51,7 @@ namespace HostCommunication.Managers
                 {
                     if (dbDescription.ShouldBeRecreated == CreationType.FromScratch)
                     {
-                        RunSqlAgainstDatabase(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"]);
+                        RunSqlAgainstDatabase(dbDescription, ConfigurationManager.AppSettings["sqlCreateBackupDb"], dbDescription.ServerDirectory);
                     }
                 }
                 DeleteData();
@@ -176,10 +176,10 @@ namespace HostCommunication.Managers
             return dpQueries;
         }
 
-        public static void RunSqlAgainstDatabase(DbDescription dbDescription, string sqlFileDirectory)
+        public static void RunSqlAgainstDatabase(DbDescription dbDescription, string sqlFileDirectory, string serverDirectory)
         {
 
-            string script = LoadPreparedSqlQueryForDbCreation(sqlFileDirectory, dbDescription.Name);
+            string script = LoadPreparedSqlQueryForDbCreation(sqlFileDirectory, dbDescription.Name, dbDescription.ServerDirectory);
 
             using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(dbDescription.Server, ConfigurationManager.AppSettings["SqlServerLogin"], ConfigurationManager.AppSettings["SqlServerPassword"]))
             {
@@ -342,7 +342,7 @@ namespace HostCommunication.Managers
                         inQueryWithVals = inQueryWithVals.Remove(inQueryWithVals.Length - 1);
                         inQueryWithVals += ")";
                         inQueryWithVals += "\r\n SET IDENTITY_INSERT dbName.dbo." + table + " OFF \r\n";
-
+                        
                         List<DbDescription> dbsToAssign = new List<DbDescription>();
                         // assign to which database on which server the specific built in the next step sql query is going to be run
                         if (dbParity % 2 == 0)
@@ -353,6 +353,7 @@ namespace HostCommunication.Managers
                                 .Find(d => d.Name == ConfigurationManager.AppSettings["D2_Database"]);
                             dbsToAssign.Add(x1);
                             dbsToAssign.Add(x2);
+                            
                         }
                         else
                         {
@@ -375,8 +376,6 @@ namespace HostCommunication.Managers
                         }
                         dbParity++;
                     }
-
-                    var x = dpQueries;
                     conn.Close();
                     da.Dispose();
                 }
@@ -413,11 +412,12 @@ namespace HostCommunication.Managers
         }
 
 
-        private static string LoadPreparedSqlQueryForDbCreation(string sqlDirectoryToModify, string dbName)
+        private static string LoadPreparedSqlQueryForDbCreation(string sqlDirectoryToModify, string dbName, string serverDirectory)
         {
             string script = File.ReadAllText(sqlDirectoryToModify);
             script = script.Replace("fmWebApp", dbName);
-            
+            script = script.Replace("SERVER_DIRECTORY\\", serverDirectory);
+
             return script;
         }
 
@@ -430,9 +430,16 @@ namespace HostCommunication.Managers
             List<DbDescription> dbDescriptions = new List<DbDescription>();
             try
             {
-                int counter = 0, serverNum = 0;
+                int counter = 0, serverNum = 0, numberOfServers = 2;
+                string serverDirectory;
                 foreach (var currentServer in _listOfServers)
                 {
+                    serverDirectory = serverNum == 0 
+                        ? 
+                        ConfigurationManager.AppSettings["DbServer_One_Directory"] 
+                        : 
+                        ConfigurationManager.AppSettings["DbServer_Two_Directory"];
+
                     // establish connection with the first server and check if specific databases are in there
                     using (var conn = ServerManager.EstablishBackupServerConn(currentServer))
                     {
@@ -442,7 +449,7 @@ namespace HostCommunication.Managers
                         {
                             if (serverNum == 0)
                             {
-                                if (counter >= 2)
+                                if (counter >= numberOfServers)
                                 {
                                     serverNum++;
                                     break;
@@ -469,7 +476,8 @@ namespace HostCommunication.Managers
                                     Exists = dbExists,
                                     IsCurrentlyConnected = dbExists,
                                     ShouldBeRecreated = CreationType.None,
-                                    MirrorSide = (i % 2 == 0) ? MirrorSide.Left : MirrorSide.Right
+                                    MirrorSide = (i % 2 == 0) ? MirrorSide.Left : MirrorSide.Right,
+                                    ServerDirectory = serverDirectory
                                 });
                             }
                             counter++;
