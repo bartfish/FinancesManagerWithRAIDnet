@@ -181,7 +181,6 @@ namespace HostCommunication.Managers
 
         public static void RunSqlAgainstDatabase(DbDescription dbDescription, string sqlFileDirectory, string serverDirectory)
         {
-
             string script = LoadPreparedSqlQueryForDbCreation(sqlFileDirectory, dbDescription.Name, dbDescription.ServerDirectory);
 
             using (var conn = ServerManager.EstablishBackupServerConnWithCredentials(dbDescription.Server, ConfigurationManager.AppSettings["SqlServerLogin"], ConfigurationManager.AppSettings["SqlServerPassword"]))

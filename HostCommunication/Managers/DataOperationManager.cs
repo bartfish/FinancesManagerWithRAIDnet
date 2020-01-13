@@ -29,7 +29,6 @@ namespace HostCommunication.Managers
                 // if everything went well 
                 // return to the method and continue its execution
                 return calledMethod.DynamicInvoke(paramsSent);
-
             }
             else if (methodReturnStatus == MethodReturnStatus.Null)
             {
@@ -64,7 +63,6 @@ namespace HostCommunication.Managers
                     errorCounter = 0;
                     return null; 
                 }
-
             }
             else
             {
@@ -80,7 +78,6 @@ namespace HostCommunication.Managers
 
         public static void SwitchToMirror()
         {
-            // go to next mirror on the other server and return it
             foreach(var mirror in _currentListOfDbs)
             {
                 if (mirror.Name != _currentlyConnectedDb.Name && mirror.MirrorSide == _currentlyConnectedDb.MirrorSide)
@@ -94,8 +91,6 @@ namespace HostCommunication.Managers
 
         public static void SwitchToOtherPart()
         {
-            // go to other part of the databases on the same server
-            // go to next mirror on the other server and return it
             foreach (var otherPart in _currentListOfDbs)
             {
                 if (otherPart.Name != _currentlyConnectedDb.Name && otherPart.MirrorSide != _currentlyConnectedDb.MirrorSide)
@@ -121,7 +116,8 @@ namespace HostCommunication.Managers
                 wasMirrorUpdated++;
                 SwitchToMirror();
                 calledMethod.DynamicInvoke(paramsSent);
-            } else
+            }
+            else
             {
                 wasMirrorUpdated = 0;
                 return;
