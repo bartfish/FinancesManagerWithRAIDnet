@@ -22,9 +22,6 @@ namespace HostCommunication.Managers
         /// <summary>
         /// Method responsible for veryfying the results assigned by the programmer
         /// </summary>
-        /// <param name="calledMethod"></param>
-        /// <param name="paramsSent"></param>
-        /// <param name="methodReturnStatus"></param>
         public static object VerifyResult(Delegate calledMethod, object[] paramsSent, MethodReturnStatus methodReturnStatus)
         {
             if (methodReturnStatus == MethodReturnStatus.Value)

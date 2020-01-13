@@ -12,8 +12,6 @@ using static FMBusiness.CustomAttributes.ViewAttributes.CustomActionFilterAttrib
 
 namespace FmWebApp.Controllers
 {
-    // TODO: Translate all static texts in the app
-
     public class BaseController : Controller
     {
         public string lang

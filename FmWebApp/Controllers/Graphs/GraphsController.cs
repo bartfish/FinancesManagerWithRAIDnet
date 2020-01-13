@@ -8,7 +8,6 @@ namespace FmWebApp.Controllers.Graphs
 {
     public class GraphsController : Controller
     {
-        // GET: Graphs
         public ActionResult _GenerateGraphsContent()
         {
             return PartialView();

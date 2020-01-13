@@ -8,6 +8,7 @@ using HostCommunication.HostModels;
 using System.Data;
 using FMDataModel.DataModels;
 using System.Collections.Generic;
+using log4net;
 
 namespace HostCommunication.Managers
 {
@@ -16,6 +17,8 @@ namespace HostCommunication.Managers
         private static List<string> _listOfDbs = new List<string>();
         private static List<string> _listOfServers = new List<string>();
         private static List<DbDescription> _listOfDbDescriptions { get; set; }
+
+        private static ILog _log { get; set; }
         
         public static void PrepareRAID()
         {
@@ -201,10 +204,9 @@ namespace HostCommunication.Managers
                     conn.Close();
 
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-
-                    throw;
+                    _log.Error(e.Message);
                 }
 
             }
@@ -229,10 +231,9 @@ namespace HostCommunication.Managers
                         conn.Close();
 
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-
-                        throw;
+                        _log.Error(e.Message);
                     }
 
                 }
@@ -400,10 +401,9 @@ namespace HostCommunication.Managers
                         conn.Close();
 
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-
-                        throw;
+                        _log.Error(e.Message);
                     }
 
                 }
@@ -486,10 +486,9 @@ namespace HostCommunication.Managers
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-
-                throw;
+                _log.Error(e.Message);
             }
             return dbDescriptions;
         }

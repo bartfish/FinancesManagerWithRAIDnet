@@ -102,7 +102,7 @@ namespace FMBusiness.Managers
                         InsertTime = DateTime.Now,
                         AccountStatus = (int)AccountStatus.Active
                     };
-
+                    // Adding the user to the currently connected database and now performing the same operation on the mirror ones. 
                     model.fm_Users.Add(newUser);
                     model.SaveChanges();
                     DataOperationManager.Synch(new Func<RegisterVModel, bool>(InsertUser), new object[] { userRegister });

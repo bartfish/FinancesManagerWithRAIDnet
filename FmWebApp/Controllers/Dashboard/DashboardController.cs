@@ -19,7 +19,7 @@ namespace FmWebApp.Controllers
             return View(layoutBaseVModel);
         }
         
-        [UserNotLoggedProtection] // for ajax reloading of the main view
+        [UserNotLoggedProtection] 
         public ActionResult DashboardRefresh()
         {
             return RedirectToAction("Dashboard", _dashboardModel);
